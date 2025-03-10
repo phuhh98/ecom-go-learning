@@ -4,6 +4,7 @@
 BIN_DIR = bin
 CMD_DIR = cmd
 DOCKER_COMPOSE = docker/docker-compose.yml
+DOCKER = podman
 
 # Detect OS
 ifeq ($(OS),Windows_NT)
@@ -27,7 +28,7 @@ build:
 # Development with hot reload
 # 1. Start dependencies (PostgreSQL, Redis, RabbitMQ) in Docker
 deps-up:
-	docker compose -f $(DOCKER_COMPOSE) up -d
+	$(DOCKER) compose -f $(DOCKER_COMPOSE) up -d
 
 # 2. Run API service with OS detection
 run-api:
@@ -47,7 +48,7 @@ endif
 
 # Stop dependencies
 deps-down:
-	docker compose -f $(DOCKER_COMPOSE) down
+	$(DOCKER) compose -f $(DOCKER_COMPOSE) down
 
 # Format code
 fmt:
