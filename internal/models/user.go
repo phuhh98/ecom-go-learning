@@ -1,21 +1,19 @@
 package models
 
 import (
-	"time"
-
 	"golang.org/x/crypto/bcrypt"
 )
 
 // User represents a user in the system
 type User struct {
-	ID        uint      `json:"id" gorm:"primaryKey"`
-	Email     string    `json:"email" gorm:"uniqueIndex;not null"`
-	Password  string    `json:"-" gorm:"not null"` // Password is not exposed in JSON
-	FirstName string    `json:"first_name"`
-	LastName  string    `json:"last_name"`
-	Role      string    `json:"role" gorm:"default:user"`
-	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`
+	BaseModel
+	Email     string `json:"email" gorm:"uniqueIndex;not null"`
+	Password  string `json:"-" gorm:"not null"` // Password is not exposed in JSON
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Role      string `json:"role" gorm:"default:user"`
+	// Cascade delete of addresses on user delete, nullable address
+	Addresses []*Address `json:"addresses"`
 }
 
 // HashPassword encrypts the password using bcrypt

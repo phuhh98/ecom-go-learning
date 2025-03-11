@@ -5,7 +5,9 @@ import (
 	"errors"
 
 	"ecom-go/internal/models"
+
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // UserRepo implements the UserRepository interface using PostgreSQL/GORM
@@ -22,7 +24,7 @@ func NewUserRepo(db *gorm.DB) *UserRepo {
 
 // Create adds a new user to the database
 func (r *UserRepo) Create(ctx context.Context, user *models.User) error {
-	result := r.db.WithContext(ctx).Create(user)
+	result := r.db.WithContext(ctx).Preload(clause.Associations).Create(user)
 	if result.Error != nil {
 		// Check for unique constraint violation
 		if errors.Is(result.Error, gorm.ErrDuplicatedKey) {
@@ -36,7 +38,7 @@ func (r *UserRepo) Create(ctx context.Context, user *models.User) error {
 // GetByID retrieves a user by ID
 func (r *UserRepo) GetByID(ctx context.Context, id uint) (*models.User, error) {
 	var user models.User
-	result := r.db.WithContext(ctx).First(&user, id)
+	result := r.db.WithContext(ctx).Preload(clause.Associations).First(&user, id)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, ErrNotFound
@@ -49,7 +51,7 @@ func (r *UserRepo) GetByID(ctx context.Context, id uint) (*models.User, error) {
 // GetByEmail retrieves a user by email
 func (r *UserRepo) GetByEmail(ctx context.Context, email string) (*models.User, error) {
 	var user models.User
-	result := r.db.WithContext(ctx).Where("email = ?", email).First(&user)
+	result := r.db.WithContext(ctx).Where("email = ?", email).Preload(clause.Associations).First(&user)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, ErrNotFound
@@ -61,7 +63,7 @@ func (r *UserRepo) GetByEmail(ctx context.Context, email string) (*models.User, 
 
 // Update updates an existing user
 func (r *UserRepo) Update(ctx context.Context, user *models.User) error {
-	result := r.db.WithContext(ctx).Save(user)
+	result := r.db.WithContext(ctx).Preload(clause.Associations).Save(user)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return ErrNotFound
@@ -86,7 +88,7 @@ func (r *UserRepo) Delete(ctx context.Context, id uint) error {
 // List retrieves users with pagination
 func (r *UserRepo) List(ctx context.Context, offset, limit int) ([]*models.User, error) {
 	var users []*models.User
-	result := r.db.WithContext(ctx).Offset(offset).Limit(limit).Find(&users)
+	result := r.db.WithContext(ctx).Offset(offset).Limit(limit).Preload(clause.Associations).Find(&users)
 	if result.Error != nil {
 		return nil, result.Error
 	}

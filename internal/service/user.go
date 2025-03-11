@@ -4,7 +4,6 @@ import (
 	"context"
 	"ecom-go/internal/dtos"
 	"errors"
-	"time"
 
 	"ecom-go/internal/models"
 	"ecom-go/internal/repository"
@@ -39,9 +38,9 @@ func (s *UserService) Create(ctx context.Context, createUserDTO dtos.CreateUserD
 		Password:  createUserDTO.Password,
 		FirstName: createUserDTO.FirstName,
 		LastName:  createUserDTO.LastName,
-		Role:      "user", // Default role
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		// Role:      "user", // Default role
+		// CreatedAt: time.Now(),
+		// UpdatedAt: time.Now(),
 	}
 
 	// Hash password
@@ -110,7 +109,7 @@ func (s *UserService) Update(ctx context.Context, id uint, updateUserDTO dtos.Up
 	if updateUserDTO.LastName != "" {
 		user.LastName = updateUserDTO.LastName
 	}
-	user.UpdatedAt = time.Now()
+	// user.UpdatedAt = time.Now()
 
 	// Save to database
 	if err := s.repo.Update(ctx, user); err != nil {

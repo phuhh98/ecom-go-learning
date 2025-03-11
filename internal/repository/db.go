@@ -128,9 +128,11 @@ func AutoMigrate(db *gorm.DB) error {
 	err := db.AutoMigrate(
 		&models.User{},
 		// Add other models for auto-migration here as they are created
-		// &models.Product{},
-		// &models.Order{},
-		// &models.OrderItem{},
+		&models.Product{},
+		&models.Category{},
+		&models.Order{},
+		&models.Item{},
+		&models.Address{},
 	)
 
 	if err != nil {

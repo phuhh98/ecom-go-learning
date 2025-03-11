@@ -40,6 +40,8 @@ func main() {
 	// Set up services
 	userService := service.NewUserService(repoFactory.User)
 	// TODO: Add other services here
+	productService := service.NewProductService(repoFactory.Product)
+	addressService := service.NewAddressService(repoFactory.Address)
 
 	// Set up HTTP server with Gin
 	router := setupRouter()
@@ -49,6 +51,11 @@ func main() {
 	userHandler := handler.NewUserHandler(userService)
 	userHandler.Register(api)
 	// TODO: Add other handlers here
+	productHandler := handler.NewProductHandler(productService)
+	productHandler.Register(api)
+
+	addressHandler := handler.NewAddressHandler(addressService)
+	addressHandler.Register(api)
 
 	// Create HTTP server
 	server := &http.Server{
