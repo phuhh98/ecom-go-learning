@@ -8,7 +8,9 @@ import (
 	"ecom-go/internal/service"
 	"ecom-go/pkg/errors"
 	"ecom-go/pkg/http/response"
+
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 // UserHandler handles HTTP requests related to users
@@ -39,6 +41,10 @@ func (h *UserHandler) Register(router *gin.RouterGroup) {
 func (h *UserHandler) Create(c *gin.Context) {
 	var createUserDTO dtos.CreateUserDTO
 	if err := c.ShouldBindJSON(&createUserDTO); err != nil {
+		if ve, ok := err.(validator.ValidationErrors); ok {
+			response.Error(c, errors.NewValidationError(&ve))
+			return
+		}
 		response.Error(c, errors.NewBadRequestError("invalid input", err))
 		return
 	}
@@ -79,6 +85,11 @@ func (h *UserHandler) Update(c *gin.Context) {
 
 	var updateUserDTO dtos.UpdateUserDTO
 	if err := c.ShouldBindJSON(&updateUserDTO); err != nil {
+		if ve, ok := err.(validator.ValidationErrors); ok {
+			response.Error(c, errors.NewValidationError(&ve))
+			return
+		}
+
 		response.Error(c, errors.NewBadRequestError("invalid input", err))
 		return
 	}
@@ -105,7 +116,7 @@ func (h *UserHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, http.StatusNoContent, nil)
+	response.Success(c, http.StatusOK, nil)
 }
 
 // List handles retrieving users with pagination

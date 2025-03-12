@@ -42,6 +42,7 @@ func main() {
 	// TODO: Add other services here
 	productService := service.NewProductService(repoFactory.Product)
 	addressService := service.NewAddressService(repoFactory.Address)
+	categoryService := service.NewCategoryService(repoFactory.Category)
 
 	// Set up HTTP server with Gin
 	router := setupRouter()
@@ -56,6 +57,9 @@ func main() {
 
 	addressHandler := handler.NewAddressHandler(addressService)
 	addressHandler.Register(api)
+
+	categoryHandler := handler.NewCategoryHandler(categoryService)
+	categoryHandler.Register(api)
 
 	// Create HTTP server
 	server := &http.Server{

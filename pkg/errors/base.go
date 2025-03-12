@@ -20,6 +20,7 @@ const (
 type ErrorItem struct {
 	Field   string `json:"field,omitempty"`
 	Message string `json:"message"`
+	// Value interface{}
 }
 
 // ResponseError represents the error response structure

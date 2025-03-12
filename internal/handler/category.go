@@ -1,0 +1,135 @@
+package handler
+
+import (
+	"ecom-go/internal/dtos"
+	"ecom-go/internal/service"
+	"ecom-go/pkg/errors"
+	"ecom-go/pkg/http/response"
+	"net/http"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
+)
+
+// CategoryHandler handles HTTP requests related to categorys
+type CategoryHandler struct {
+	categoryService *service.CategoryService
+}
+
+// NewCategoryHandler creates a new category handler
+func NewCategoryHandler(categoryService *service.CategoryService) *CategoryHandler {
+	return &CategoryHandler{
+		categoryService: categoryService,
+	}
+}
+
+// Register sets up routes for the category handler
+func (h *CategoryHandler) Register(router *gin.RouterGroup) {
+	categorys := router.Group("/categories")
+	{
+		categorys.POST("", h.Create)
+		categorys.GET("", h.List)
+		categorys.GET("/:id", h.GetByID)
+		// categorys.GET("/", h.GetByID) query by name ??
+		categorys.PUT("/:id", h.Update)
+		categorys.DELETE("/:id", h.Delete)
+	}
+}
+
+// Create handles category creation
+func (h *CategoryHandler) Create(c *gin.Context) {
+	var createCategoryDTO dtos.CreateCategoryDTO
+	if err := c.ShouldBindJSON(&createCategoryDTO); err != nil {
+		if ve, ok := err.(validator.ValidationErrors); ok {
+			response.Error(c, errors.NewValidationError(&ve))
+			return
+		}
+
+		response.Error(c, errors.NewBadRequestError("invalid input", err))
+		return
+	}
+
+	category, err := h.categoryService.Create(c.Request.Context(), createCategoryDTO)
+	if err != nil {
+		response.Error(c, err)
+		return
+	}
+
+	response.Success(c, http.StatusCreated, category)
+}
+
+// GetByID handles retrieving a category by ID
+func (h *CategoryHandler) GetByID(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		response.Error(c, errors.NewBadRequestError("invalid category ID"))
+		return
+	}
+
+	category, err := h.categoryService.GetByID(c.Request.Context(), uint(id))
+	if err != nil {
+		response.Error(c, err)
+		return
+	}
+
+	response.Success(c, http.StatusOK, category)
+}
+
+// Update handles updating a category
+func (h *CategoryHandler) Update(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		response.Error(c, errors.NewBadRequestError("invalid category ID"))
+		return
+	}
+
+	var updateCategoryDTO dtos.UpdateCategoryDTO
+	if err := c.ShouldBindJSON(&updateCategoryDTO); err != nil {
+		if ve, ok := err.(validator.ValidationErrors); ok {
+			response.Error(c, errors.NewValidationError(&ve))
+			return
+		}
+
+		response.Error(c, errors.NewBadRequestError("invalid input", err))
+		return
+	}
+
+	category, err := h.categoryService.Update(c.Request.Context(), uint(id), updateCategoryDTO)
+	if err != nil {
+		response.Error(c, err)
+		return
+	}
+
+	response.Success(c, http.StatusOK, category)
+}
+
+// Delete handles deleting a category
+func (h *CategoryHandler) Delete(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		response.Error(c, errors.NewBadRequestError("invalid category ID"))
+		return
+	}
+
+	if err := h.categoryService.Delete(c.Request.Context(), uint(id)); err != nil {
+		response.Error(c, err)
+		return
+	}
+
+	response.Success(c, http.StatusOK, nil)
+}
+
+// List handles retrieving categorys with pagination
+func (h *CategoryHandler) List(c *gin.Context) {
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("per_page", "10"))
+
+	categorys, total, err := h.categoryService.List(c.Request.Context(), page, pageSize)
+	if err != nil {
+		response.Error(c, err)
+		return
+	}
+
+	response.SuccessWithPagination(c, http.StatusOK, categorys, page, pageSize, total)
+}

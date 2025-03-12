@@ -22,7 +22,7 @@ func NewProductRepo(db *gorm.DB) *ProductRepo {
 	}
 }
 
-//TODO: Template - need to update
+// TODO: Template - need to update
 // Create adds a new product to the database
 func (r *ProductRepo) Create(ctx context.Context, product *models.Product) error {
 	result := r.db.WithContext(ctx).Create(product)
@@ -49,7 +49,7 @@ func (r *ProductRepo) GetByID(ctx context.Context, id uint) (*models.Product, er
 	return &product, nil
 }
 
-// GetByEmail retrieves a product by email
+// GetByCode retrieves a product by product code
 func (r *ProductRepo) GetByCode(ctx context.Context, code string) (*models.Product, error) {
 	var product models.Product
 	result := r.db.WithContext(ctx).Where("code = ?", code).First(&product)

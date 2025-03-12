@@ -21,7 +21,7 @@ func NewAddressRepo(db *gorm.DB) *AddressRepo {
 	}
 }
 
-//TODO: Template - need to update
+// TODO: Template - need to update
 // Create adds a new address to the database
 func (r *AddressRepo) Create(ctx context.Context, address *models.Address) error {
 	result := r.db.WithContext(ctx).Create(address)

@@ -1,6 +1,6 @@
 package models
 
-//  Product items
+// Product items
 type Item struct {
 	BaseModel
 	// an Item belongs to a Product

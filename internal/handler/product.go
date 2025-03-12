@@ -2,14 +2,14 @@ package handler
 
 import (
 	"ecom-go/internal/dtos"
-	"net/http"
-	"strconv"
-
 	"ecom-go/internal/service"
 	"ecom-go/pkg/errors"
 	"ecom-go/pkg/http/response"
+	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 // ProductHandler handles HTTP requests related to products
@@ -40,7 +40,12 @@ func (h *ProductHandler) Register(router *gin.RouterGroup) {
 func (h *ProductHandler) Create(c *gin.Context) {
 	var createProductDTO dtos.CreateProductDTO
 	if err := c.ShouldBindJSON(&createProductDTO); err != nil {
-		response.Error(c, errors.NewBadRequestError("invalid input 1", err))
+		if ve, ok := err.(validator.ValidationErrors); ok {
+			response.Error(c, errors.NewValidationError(&ve))
+			return
+		}
+
+		response.Error(c, errors.NewBadRequestError("invalid input", err))
 		return
 	}
 
@@ -80,6 +85,11 @@ func (h *ProductHandler) Update(c *gin.Context) {
 
 	var updateProductDTO dtos.UpdateProductDTO
 	if err := c.ShouldBindJSON(&updateProductDTO); err != nil {
+		if ve, ok := err.(validator.ValidationErrors); ok {
+			response.Error(c, errors.NewValidationError(&ve))
+			return
+		}
+
 		response.Error(c, errors.NewBadRequestError("invalid input", err))
 		return
 	}
@@ -106,7 +116,7 @@ func (h *ProductHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, http.StatusNoContent, nil)
+	response.Success(c, http.StatusOK, nil)
 }
 
 // List handles retrieving products with pagination

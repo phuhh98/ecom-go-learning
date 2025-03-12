@@ -68,13 +68,3 @@ func NewForbiddenError(message string, cause ...error) BaseError {
 	}
 	return err
 }
-
-// ValidationError represents a validation error with field information
-func NewValidationError(field, message string) BaseError {
-	return &baseError{
-		errorType:  ErrorTypeBadRequest,
-		message:    message,
-		field:      field,
-		statusCode: http.StatusBadRequest,
-	}
-}

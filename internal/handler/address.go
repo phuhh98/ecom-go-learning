@@ -10,6 +10,7 @@ import (
 	"ecom-go/pkg/http/response"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 // AddressHandler handles HTTP requests related to addresss
@@ -40,6 +41,11 @@ func (h *AddressHandler) Register(router *gin.RouterGroup) {
 func (h *AddressHandler) Create(c *gin.Context) {
 	var createAddressDTO dtos.CreateAddressDTO
 	if err := c.ShouldBindJSON(&createAddressDTO); err != nil {
+		if ve, ok := err.(validator.ValidationErrors); ok {
+			response.Error(c, errors.NewValidationError(&ve))
+			return
+		}
+
 		response.Error(c, errors.NewBadRequestError("invalid input", err))
 		return
 	}
@@ -80,6 +86,11 @@ func (h *AddressHandler) Update(c *gin.Context) {
 
 	var updateAddressDTO dtos.UpdateAddressDTO
 	if err := c.ShouldBindJSON(&updateAddressDTO); err != nil {
+		if ve, ok := err.(validator.ValidationErrors); ok {
+			response.Error(c, errors.NewValidationError(&ve))
+			return
+		}
+
 		response.Error(c, errors.NewBadRequestError("invalid input", err))
 		return
 	}
@@ -106,7 +117,7 @@ func (h *AddressHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, http.StatusNoContent, nil)
+	response.Success(c, http.StatusOK, nil)
 }
 
 // // List handles retrieving addresss with pagination

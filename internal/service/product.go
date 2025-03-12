@@ -24,7 +24,7 @@ func NewProductService(repo repository.ProductRepository) *ProductService {
 
 // Create creates a new product
 func (s *ProductService) Create(ctx context.Context, createProductDTO dtos.CreateProductDTO) (*models.Product, error) {
-	// Check if user with same email already exists
+	// Check if product with the same code already exists
 	_, err := s.repo.GetByCode(ctx, createProductDTO.Code)
 	if err == nil {
 		return nil, appError.NewBadRequestError("product code already exists")
