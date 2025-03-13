@@ -26,14 +26,17 @@ func NewCategoryHandler(categoryService *service.CategoryService) *CategoryHandl
 
 // Register sets up routes for the category handler
 func (h *CategoryHandler) Register(router *gin.RouterGroup) {
-	categorys := router.Group("/categories")
+	categories := router.Group("/categories")
 	{
-		categorys.POST("", h.Create)
-		categorys.GET("", h.List)
-		categorys.GET("/:id", h.GetByID)
-		// categorys.GET("/", h.GetByID) query by name ??
-		categorys.PUT("/:id", h.Update)
-		categorys.DELETE("/:id", h.Delete)
+		categories.POST("", h.Create)
+		categories.GET("", h.List)
+		categories.GET("/:id", h.GetByID)
+		categories.PUT("/:id", h.Update)
+		categories.DELETE("/:id", h.Delete)
+		categories.POST("/:id/products/:product_id", h.AddProduct)
+		categories.DELETE("/:id/products/:product_id", h.RemoveProduct)
+		categories.POST("/:id/subcategories/:subcategory_id", h.AddSubcategory)
+		categories.DELETE("/:id/subcategories/:subcategory_id", h.RemoveSubcategory)
 	}
 }
 
@@ -42,17 +45,17 @@ func (h *CategoryHandler) Create(c *gin.Context) {
 	var createCategoryDTO dtos.CreateCategoryDTO
 	if err := c.ShouldBindJSON(&createCategoryDTO); err != nil {
 		if ve, ok := err.(validator.ValidationErrors); ok {
-			response.Error(c, errors.NewValidationError(&ve))
+			c.Error(errors.NewValidationError(&ve))
 			return
 		}
 
-		response.Error(c, errors.NewBadRequestError("invalid input", err))
+		c.Error(errors.NewBadRequestError("invalid input", err))
 		return
 	}
 
 	category, err := h.categoryService.Create(c.Request.Context(), createCategoryDTO)
 	if err != nil {
-		response.Error(c, err)
+		c.Error(err)
 		return
 	}
 
@@ -63,13 +66,13 @@ func (h *CategoryHandler) Create(c *gin.Context) {
 func (h *CategoryHandler) GetByID(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		response.Error(c, errors.NewBadRequestError("invalid category ID"))
+		c.Error(errors.NewBadRequestError("invalid category ID"))
 		return
 	}
 
 	category, err := h.categoryService.GetByID(c.Request.Context(), uint(id))
 	if err != nil {
-		response.Error(c, err)
+		c.Error(err)
 		return
 	}
 
@@ -80,24 +83,24 @@ func (h *CategoryHandler) GetByID(c *gin.Context) {
 func (h *CategoryHandler) Update(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		response.Error(c, errors.NewBadRequestError("invalid category ID"))
+		c.Error(errors.NewBadRequestError("invalid category ID"))
 		return
 	}
 
 	var updateCategoryDTO dtos.UpdateCategoryDTO
 	if err := c.ShouldBindJSON(&updateCategoryDTO); err != nil {
 		if ve, ok := err.(validator.ValidationErrors); ok {
-			response.Error(c, errors.NewValidationError(&ve))
+			c.Error(errors.NewValidationError(&ve))
 			return
 		}
 
-		response.Error(c, errors.NewBadRequestError("invalid input", err))
+		c.Error(errors.NewBadRequestError("invalid input", err))
 		return
 	}
 
 	category, err := h.categoryService.Update(c.Request.Context(), uint(id), updateCategoryDTO)
 	if err != nil {
-		response.Error(c, err)
+		c.Error(err)
 		return
 	}
 
@@ -108,12 +111,12 @@ func (h *CategoryHandler) Update(c *gin.Context) {
 func (h *CategoryHandler) Delete(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		response.Error(c, errors.NewBadRequestError("invalid category ID"))
+		c.Error(errors.NewBadRequestError("invalid category ID"))
 		return
 	}
 
 	if err := h.categoryService.Delete(c.Request.Context(), uint(id)); err != nil {
-		response.Error(c, err)
+		c.Error(err)
 		return
 	}
 
@@ -127,9 +130,95 @@ func (h *CategoryHandler) List(c *gin.Context) {
 
 	categorys, total, err := h.categoryService.List(c.Request.Context(), page, pageSize)
 	if err != nil {
-		response.Error(c, err)
+		c.Error(err)
 		return
 	}
 
 	response.SuccessWithPagination(c, http.StatusOK, categorys, page, pageSize, total)
+}
+
+func (h *CategoryHandler) AddProduct(c *gin.Context) {
+	categoryId, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.Error(errors.NewBadRequestError("invalid category ID"))
+		return
+	}
+
+	productId, err := strconv.ParseUint(c.Param("product_id"), 10, 64)
+	if err != nil {
+		c.Error(errors.NewBadRequestError("invalid product ID"))
+		return
+	}
+
+	updatedCategory, err := h.categoryService.AddProductToCategory(c.Request.Context(), uint(categoryId), uint(productId))
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	response.Success(c, http.StatusOK, updatedCategory)
+}
+
+func (h *CategoryHandler) RemoveProduct(c *gin.Context) {
+	categoryId, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.Error(errors.NewBadRequestError("invalid category ID"))
+		return
+	}
+	productId, err := strconv.ParseUint(c.Param("product_id"), 10, 64)
+	if err != nil {
+		c.Error(errors.NewBadRequestError("invalid product ID"))
+		return
+	}
+
+	updatedCategory, err := h.categoryService.RemoveProductFromCategory(c.Request.Context(), uint(categoryId), uint(productId))
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	response.Success(c, http.StatusOK, updatedCategory)
+}
+
+func (h *CategoryHandler) AddSubcategory(c *gin.Context) {
+	// validate category id and subcategory id
+	categoryId, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.Error(errors.NewBadRequestError("invalid category ID"))
+		return
+	}
+	subcategoryId, err := strconv.ParseUint(c.Param("subcategory_id"), 10, 64)
+	if err != nil {
+		c.Error(errors.NewBadRequestError("invalid subcategory ID"))
+		return
+	}
+
+	// update category subcategories with an update
+	updatedCategory, err := h.categoryService.AddSubcategoryToCategory(c.Request.Context(), uint(categoryId), uint(subcategoryId))
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	response.Success(c, http.StatusOK, updatedCategory)
+}
+
+func (h *CategoryHandler) RemoveSubcategory(c *gin.Context) {
+	// validate category id and subcategory id
+	categoryId, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.Error(errors.NewBadRequestError("invalid category ID"))
+		return
+	}
+	subcategoryId, err := strconv.ParseUint(c.Param("subcategory_id"), 10, 64)
+	if err != nil {
+		c.Error(errors.NewBadRequestError("invalid subcategory ID"))
+		return
+	}
+
+	// update category subcategories with an update
+	updatedCategory, err := h.categoryService.RemoveSubcategoryFromCategory(c.Request.Context(), uint(categoryId), uint(subcategoryId))
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	response.Success(c, http.StatusOK, updatedCategory)
 }

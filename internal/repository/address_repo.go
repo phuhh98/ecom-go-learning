@@ -68,22 +68,30 @@ func (r *AddressRepo) Delete(ctx context.Context, id uint) error {
 	return nil
 }
 
-// // List retrieves addresss with pagination
-// func (r *AddressRepo) List(ctx context.Context, offset, limit int) ([]*models.Address, error) {
-// 	var addresss []*models.Address
-// 	result := r.db.WithContext(ctx).Offset(offset).Limit(limit).Find(&addresss)
-// 	if result.Error != nil {
-// 		return nil, result.Error
-// 	}
-// 	return addresss, nil
-// }
+// List retrieves addresss with pagination
+func (r *AddressRepo) List(ctx context.Context, offset, limit int, userID *uint) ([]*models.Address, error) {
+	var addresss []*models.Address
+	query := r.db.WithContext(ctx).Offset(offset).Limit(limit)
+	if userID != nil {
+		query = query.Where("user_id = ?", *userID)
+	}
+	result := query.Find(&addresss)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return addresss, nil
+}
 
-// // Count returns the total number of addresss
-// func (r *AddressRepo) Count(ctx context.Context) (int64, error) {
-// 	var count int64
-// 	result := r.db.WithContext(ctx).Model(&models.Address{}).Count(&count)
-// 	if result.Error != nil {
-// 		return 0, result.Error
-// 	}
-// 	return count, nil
-// }
+// Count returns the total number of addresss
+func (r *AddressRepo) Count(ctx context.Context, userID *uint) (int64, error) {
+	var count int64
+	query := r.db.WithContext(ctx).Model(&models.Address{})
+	if userID != nil {
+		query = query.Where("user_id = ?", *userID)
+	}
+	result := query.Count(&count)
+	if result.Error != nil {
+		return 0, result.Error
+	}
+	return count, nil
+}

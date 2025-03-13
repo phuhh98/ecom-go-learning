@@ -93,28 +93,27 @@ func (s *AddressService) Delete(ctx context.Context, id uint) error {
 	return nil
 }
 
-// // List retrieves addresss with pagination
-// func (s *AddressService) List(ctx context.Context, page, pageSize int) ([]*models.Address, int64, error) {
-// 	if page < 1 {
-// 		page = 1
-// 	}
-// 	if pageSize < 1 {
-// 		pageSize = 10
-// 	}
+// List retrieves addresss with pagination
+func (s *AddressService) ListByUserID(ctx context.Context, page, pageSize int, userID uint) ([]*models.Address, int64, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 10
+	}
 
-// 	offset := (page - 1) * pageSize
+	offset := (page - 1) * pageSize
+	// Get addresss
+	addresss, err := s.repo.List(ctx, offset, pageSize, &userID)
+	if err != nil {
+		return nil, 0, appError.NewServerError("error retrieving addresss", err)
+	}
 
-// 	// Get addresss
-// 	addresss, err := s.repo.List(ctx, offset, pageSize)
-// 	if err != nil {
-// 		return nil, 0, appError.NewServerError("error retrieving addresss", err)
-// 	}
+	// Get total count
+	total, err := s.repo.Count(ctx, &userID)
+	if err != nil {
+		return nil, 0, appError.NewServerError("error counting addresss", err)
+	}
 
-// 	// Get total count
-// 	total, err := s.repo.Count(ctx)
-// 	if err != nil {
-// 		return nil, 0, appError.NewServerError("error counting addresss", err)
-// 	}
-
-// 	return addresss, total, nil
-// }
+	return addresss, total, nil
+}

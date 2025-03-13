@@ -42,16 +42,16 @@ func (h *UserHandler) Create(c *gin.Context) {
 	var createUserDTO dtos.CreateUserDTO
 	if err := c.ShouldBindJSON(&createUserDTO); err != nil {
 		if ve, ok := err.(validator.ValidationErrors); ok {
-			response.Error(c, errors.NewValidationError(&ve))
+			c.Error(errors.NewValidationError(&ve))
 			return
 		}
-		response.Error(c, errors.NewBadRequestError("invalid input", err))
+		c.Error(errors.NewBadRequestError("invalid input", err))
 		return
 	}
 
 	user, err := h.userService.Create(c.Request.Context(), createUserDTO)
 	if err != nil {
-		response.Error(c, err)
+		c.Error(err)
 		return
 	}
 
@@ -62,13 +62,13 @@ func (h *UserHandler) Create(c *gin.Context) {
 func (h *UserHandler) GetByID(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		response.Error(c, errors.NewBadRequestError("invalid user ID"))
+		c.Error(errors.NewBadRequestError("invalid user ID"))
 		return
 	}
 
 	user, err := h.userService.GetByID(c.Request.Context(), uint(id))
 	if err != nil {
-		response.Error(c, err)
+		c.Error(err)
 		return
 	}
 
@@ -79,24 +79,24 @@ func (h *UserHandler) GetByID(c *gin.Context) {
 func (h *UserHandler) Update(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		response.Error(c, errors.NewBadRequestError("invalid user ID"))
+		c.Error(errors.NewBadRequestError("invalid user ID"))
 		return
 	}
 
 	var updateUserDTO dtos.UpdateUserDTO
 	if err := c.ShouldBindJSON(&updateUserDTO); err != nil {
 		if ve, ok := err.(validator.ValidationErrors); ok {
-			response.Error(c, errors.NewValidationError(&ve))
+			c.Error(errors.NewValidationError(&ve))
 			return
 		}
 
-		response.Error(c, errors.NewBadRequestError("invalid input", err))
+		c.Error(errors.NewBadRequestError("invalid input", err))
 		return
 	}
 
 	user, err := h.userService.Update(c.Request.Context(), uint(id), updateUserDTO)
 	if err != nil {
-		response.Error(c, err)
+		c.Error(err)
 		return
 	}
 
@@ -107,12 +107,12 @@ func (h *UserHandler) Update(c *gin.Context) {
 func (h *UserHandler) Delete(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		response.Error(c, errors.NewBadRequestError("invalid user ID"))
+		c.Error(errors.NewBadRequestError("invalid user ID"))
 		return
 	}
 
 	if err := h.userService.Delete(c.Request.Context(), uint(id)); err != nil {
-		response.Error(c, err)
+		c.Error(err)
 		return
 	}
 
@@ -121,12 +121,20 @@ func (h *UserHandler) Delete(c *gin.Context) {
 
 // List handles retrieving users with pagination
 func (h *UserHandler) List(c *gin.Context) {
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("per_page", "10"))
+	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	if err != nil || page <= 0 {
+		c.Error(errors.NewBadRequestError("invalid page parameter"))
+		return
+	}
+	pageSize, err := strconv.Atoi(c.DefaultQuery("per_page", "10"))
+	if err != nil || pageSize <= 0 {
+		c.Error(errors.NewBadRequestError("invalid per_page parameter"))
+		return
+	}
 
 	users, total, err := h.userService.List(c.Request.Context(), page, pageSize)
 	if err != nil {
-		response.Error(c, err)
+		c.Error(err)
 		return
 	}
 

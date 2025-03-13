@@ -42,7 +42,7 @@ func main() {
 	// TODO: Add other services here
 	productService := service.NewProductService(repoFactory.Product)
 	addressService := service.NewAddressService(repoFactory.Address)
-	categoryService := service.NewCategoryService(repoFactory.Category)
+	categoryService := service.NewCategoryService(repoFactory.Category, productService)
 
 	// Set up HTTP server with Gin
 	router := setupRouter()
@@ -107,6 +107,7 @@ func setupRouter() *gin.Engine {
 	// Add middlewares
 	router.Use(middleware.Logger())
 	router.Use(gin.Recovery())
+	router.Use(middleware.Error())
 
 	// Health check route
 	router.GET("/health", func(c *gin.Context) {

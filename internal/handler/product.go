@@ -41,17 +41,17 @@ func (h *ProductHandler) Create(c *gin.Context) {
 	var createProductDTO dtos.CreateProductDTO
 	if err := c.ShouldBindJSON(&createProductDTO); err != nil {
 		if ve, ok := err.(validator.ValidationErrors); ok {
-			response.Error(c, errors.NewValidationError(&ve))
+			c.Error(errors.NewValidationError(&ve))
 			return
 		}
 
-		response.Error(c, errors.NewBadRequestError("invalid input", err))
+		c.Error(errors.NewBadRequestError("invalid input", err))
 		return
 	}
 
 	product, err := h.productService.Create(c.Request.Context(), createProductDTO)
 	if err != nil {
-		response.Error(c, err)
+		c.Error(err)
 		return
 	}
 
@@ -62,13 +62,13 @@ func (h *ProductHandler) Create(c *gin.Context) {
 func (h *ProductHandler) GetByID(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		response.Error(c, errors.NewBadRequestError("invalid product ID"))
+		c.Error(errors.NewBadRequestError("invalid product ID"))
 		return
 	}
 
 	product, err := h.productService.GetByID(c.Request.Context(), uint(id))
 	if err != nil {
-		response.Error(c, err)
+		c.Error(err)
 		return
 	}
 
@@ -79,24 +79,24 @@ func (h *ProductHandler) GetByID(c *gin.Context) {
 func (h *ProductHandler) Update(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		response.Error(c, errors.NewBadRequestError("invalid product ID"))
+		c.Error(errors.NewBadRequestError("invalid product ID"))
 		return
 	}
 
 	var updateProductDTO dtos.UpdateProductDTO
 	if err := c.ShouldBindJSON(&updateProductDTO); err != nil {
 		if ve, ok := err.(validator.ValidationErrors); ok {
-			response.Error(c, errors.NewValidationError(&ve))
+			c.Error(errors.NewValidationError(&ve))
 			return
 		}
 
-		response.Error(c, errors.NewBadRequestError("invalid input", err))
+		c.Error(errors.NewBadRequestError("invalid input", err))
 		return
 	}
 
 	product, err := h.productService.Update(c.Request.Context(), uint(id), updateProductDTO)
 	if err != nil {
-		response.Error(c, err)
+		c.Error(err)
 		return
 	}
 
@@ -107,12 +107,12 @@ func (h *ProductHandler) Update(c *gin.Context) {
 func (h *ProductHandler) Delete(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		response.Error(c, errors.NewBadRequestError("invalid product ID"))
+		c.Error(errors.NewBadRequestError("invalid product ID"))
 		return
 	}
 
 	if err := h.productService.Delete(c.Request.Context(), uint(id)); err != nil {
-		response.Error(c, err)
+		c.Error(err)
 		return
 	}
 
@@ -126,7 +126,7 @@ func (h *ProductHandler) List(c *gin.Context) {
 
 	products, total, err := h.productService.List(c.Request.Context(), page, pageSize)
 	if err != nil {
-		response.Error(c, err)
+		c.Error(err)
 		return
 	}
 

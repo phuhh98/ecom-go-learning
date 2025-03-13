@@ -12,13 +12,15 @@ import (
 
 // CategoryService handles business logic related to Category
 type CategoryService struct {
-	repo repository.CategoryRepository
+	repo           repository.CategoryRepository
+	productService *ProductService
 }
 
 // NewCategoryService creates a new category service
-func NewCategoryService(repo repository.CategoryRepository) *CategoryService {
+func NewCategoryService(repo repository.CategoryRepository, productService *ProductService) *CategoryService {
 	return &CategoryService{
-		repo: repo,
+		repo:           repo,
+		productService: productService,
 	}
 }
 
@@ -66,8 +68,8 @@ func (s *CategoryService) GetByName(ctx context.Context, name string) (*models.C
 	return category, nil
 }
 
-func (s *CategoryService) Update(ctx context.Context, id uint, updateCategoryDTO dtos.UpdateCategoryDTO) (*models.Category, error) {
-	category, err := s.repo.GetByID(ctx, id)
+func (s *CategoryService) Update(ctx context.Context, categoryID uint, updateCategoryDTO dtos.UpdateCategoryDTO) (*models.Category, error) {
+	category, err := s.repo.GetByID(ctx, categoryID)
 	if err != nil {
 		if errors.Is(err, repository.ErrNotFound) {
 			return nil, appError.NewNotFoundError("category not found")
@@ -78,7 +80,7 @@ func (s *CategoryService) Update(ctx context.Context, id uint, updateCategoryDTO
 	// Check if category name is being changed and is already in use
 	if updateCategoryDTO.Name != "" && updateCategoryDTO.Name != category.Name {
 		existingCategory, err := s.repo.GetByName(ctx, updateCategoryDTO.Name)
-		if err == nil && existingCategory.ID != id {
+		if err == nil && existingCategory.ID != categoryID {
 			return nil, appError.NewBadRequestError("category code already exists")
 		} else if err != nil && !errors.Is(err, repository.ErrNotFound) {
 			return nil, appError.NewServerError("error checking existing category code", err)
@@ -99,7 +101,8 @@ func (s *CategoryService) Update(ctx context.Context, id uint, updateCategoryDTO
 		return nil, appError.NewServerError("error updating category", err)
 	}
 
-	return category, nil
+	updatedCategory, err := s.GetByID(ctx, categoryID)
+	return updatedCategory, nil
 }
 
 // Delete removes a category
@@ -137,4 +140,118 @@ func (s *CategoryService) List(ctx context.Context, page, pageSize int) ([]*mode
 	}
 
 	return categorys, total, nil
+}
+
+func (s *CategoryService) AddProductToCategory(ctx context.Context, categoryID uint, productID uint) (*models.Category, error) {
+	category, err := s.GetByID(ctx, categoryID)
+	if err != nil {
+		return nil, appError.NewNotFoundError("category not found")
+	}
+
+	product, err := s.productService.GetByID(ctx, productID)
+	if err != nil {
+		return nil, appError.NewNotFoundError("product not found")
+	}
+
+	// Check if product already exists in category
+	for _, p := range category.Products {
+		if p.ID == productID {
+			return nil, appError.NewBadRequestError("product already exists in category")
+		}
+	}
+
+	category.Products = append(category.Products, product)
+	err = s.repo.Update(ctx, category)
+	if err != nil {
+		return nil, appError.NewServerError("error updating category", err)
+	}
+	updatedCategory, err := s.GetByID(ctx, categoryID)
+	return updatedCategory, nil
+}
+
+func (s *CategoryService) RemoveProductFromCategory(ctx context.Context, categoryID uint, productID uint) (*models.Category, error) {
+	category, err := s.GetByID(ctx, categoryID)
+	if err != nil {
+		return nil, appError.NewNotFoundError("category not found")
+	}
+	_, err = s.productService.GetByID(ctx, productID)
+	if err != nil {
+		return nil, appError.NewNotFoundError("product not found")
+	}
+	// Check if product exists in category
+	var index int
+	for i, p := range category.Products {
+		if p.ID == productID {
+			index = i
+			break
+		}
+	}
+
+	if index == -1 {
+		return nil, appError.NewBadRequestError("product does not exist in category")
+	}
+
+	// Remove product from category
+	category.Products = append(category.Products[:index], category.Products[index+1:]...)
+	err = s.repo.Update(ctx, category)
+	if err != nil {
+		return nil, appError.NewServerError("error updating category", err)
+	}
+	updatedCategory, err := s.GetByID(ctx, categoryID)
+	return updatedCategory, nil
+}
+
+func (s *CategoryService) AddSubcategoryToCategory(ctx context.Context, categoryID uint, subcategoryID uint) (*models.Category, error) {
+	category, err := s.GetByID(ctx, categoryID)
+	if err != nil {
+		return nil, appError.NewNotFoundError("category not found")
+	}
+
+	subcategory, err := s.GetByID(ctx, subcategoryID)
+	if err != nil {
+		return nil, appError.NewNotFoundError("subcategory not found")
+	}
+
+	// Check if sucategory already exists in category
+	for _, sc := range category.SubCategories {
+		if sc.ID == subcategoryID {
+			return nil, appError.NewBadRequestError("subcategory already exists in category")
+		}
+	}
+
+	// Perform an update with sub category attached to category
+	category.SubCategories = append(category.SubCategories, subcategory)
+	err = s.repo.Update(ctx, category)
+	if err != nil {
+		return nil, appError.NewServerError("error updating category", err)
+	}
+	updatedCategory, err := s.GetByID(ctx, categoryID)
+	return updatedCategory, nil
+}
+
+func (s *CategoryService) RemoveSubcategoryFromCategory(ctx context.Context, categoryID uint, subcategoryID uint) (*models.Category, error) {
+	category, err := s.GetByID(ctx, categoryID)
+	if err != nil {
+		return nil, appError.NewNotFoundError("category not found")
+	}
+
+	_, err = s.GetByID(ctx, subcategoryID)
+	if err != nil {
+		return nil, appError.NewNotFoundError("subcategory not found")
+	}
+
+	// Perform an update with sub category removed from category
+	for i, subCategory := range category.SubCategories {
+		if subCategory.ID == subcategoryID {
+			category.SubCategories = append(category.SubCategories[:i], category.SubCategories[i+1:]...)
+			break
+		}
+	}
+
+	err = s.repo.Update(ctx, category)
+	if err != nil {
+		return nil, appError.NewServerError("error updating category", err)
+	}
+	updatedCategory, err := s.GetByID(ctx, categoryID)
+	return updatedCategory, nil
 }

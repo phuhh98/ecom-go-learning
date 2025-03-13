@@ -22,7 +22,7 @@ func NewCategoryRepo(db *gorm.DB) *CategoryRepo {
 	}
 }
 
-//TODO: Template - need to update
+// TODO: Template - need to update
 // Create adds a new category to the database
 func (r *CategoryRepo) Create(ctx context.Context, category *models.Category) error {
 	result := r.db.WithContext(ctx).Create(category)
@@ -52,7 +52,7 @@ func (r *CategoryRepo) GetByID(ctx context.Context, id uint) (*models.Category, 
 // GetByName retrieves a category by name - unique
 func (r *CategoryRepo) GetByName(ctx context.Context, name string) (*models.Category, error) {
 	var category models.Category
-	result := r.db.WithContext(ctx).Where("name = ?", name).First(&category)
+	result := r.db.WithContext(ctx).Where("name = ?", name).Preload(clause.Associations).First(&category)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, ErrNotFound
@@ -64,13 +64,20 @@ func (r *CategoryRepo) GetByName(ctx context.Context, name string) (*models.Cate
 
 // Update updates an existing category
 func (r *CategoryRepo) Update(ctx context.Context, category *models.Category) error {
-	result := r.db.WithContext(ctx).Save(category)
-	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return ErrNotFound
-		}
-		return result.Error
+	// Use `Association().Replace` to synchronize the relationship.
+	if err := r.db.WithContext(ctx).Model(category).Association("Products").Replace(category.Products); err != nil {
+		return err // Handle the error appropriately
 	}
+
+	if err := r.db.WithContext(ctx).Model(category).Association("SubCategories").Replace(category.SubCategories); err != nil {
+		return err // Handle the error appropriately
+	}
+
+	// Then, update other attributes
+	if err := r.db.WithContext(ctx).Model(category).Select("*").Omit("Products", "SubCategories").Updates(category).Error; err != nil {
+		return err // Handle the error appropriately
+	}
+
 	return nil
 }
 
@@ -89,7 +96,7 @@ func (r *CategoryRepo) Delete(ctx context.Context, id uint) error {
 // List retrieves categorys with pagination
 func (r *CategoryRepo) List(ctx context.Context, offset, limit int) ([]*models.Category, error) {
 	var categorys []*models.Category
-	result := r.db.WithContext(ctx).Offset(offset).Limit(limit).Find(&categorys)
+	result := r.db.WithContext(ctx).Offset(offset).Limit(limit).Preload(clause.Associations).Find(&categorys)
 	if result.Error != nil {
 		return nil, result.Error
 	}

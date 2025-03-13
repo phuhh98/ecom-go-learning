@@ -19,9 +19,9 @@ type AddressRepository interface {
 	// Remove a Address from the database
 	Delete(ctx context.Context, id uint) error
 
-	// // List retrieves Addresss with pagination
-	// List(ctx context.Context, offset, limit int) ([]*models.Address, error)
+	// List retrieves Addresss with pagination
+	List(ctx context.Context, offset, limit int, userID *uint) ([]*models.Address, error)
 
-	// // Count returns the total number of users
-	// Count(ctx context.Context) (int64, error)
+	// Count returns the total number of users
+	Count(ctx context.Context, userID *uint) (int64, error)
 }

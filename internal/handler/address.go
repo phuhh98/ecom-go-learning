@@ -27,13 +27,14 @@ func NewAddressHandler(addressService *service.AddressService) *AddressHandler {
 
 // Register sets up routes for the address handler
 func (h *AddressHandler) Register(router *gin.RouterGroup) {
-	addresss := router.Group("/addresses")
+	addresses := router.Group("/addresses")
 	{
-		addresss.POST("", h.Create)
-		// addresss.GET("", h.List)
-		addresss.GET("/:id", h.GetByID)
-		addresss.PUT("/:id", h.Update)
-		addresss.DELETE("/:id", h.Delete)
+		addresses.POST("", h.Create)
+		addresses.GET("/:id", h.GetByID)
+		addresses.PUT("/:id", h.Update)
+		addresses.DELETE("/:id", h.Delete)
+
+		addresses.GET("/user/:userId", h.ListByUserID)
 	}
 }
 
@@ -42,17 +43,17 @@ func (h *AddressHandler) Create(c *gin.Context) {
 	var createAddressDTO dtos.CreateAddressDTO
 	if err := c.ShouldBindJSON(&createAddressDTO); err != nil {
 		if ve, ok := err.(validator.ValidationErrors); ok {
-			response.Error(c, errors.NewValidationError(&ve))
+			c.Error(errors.NewValidationError(&ve))
 			return
 		}
 
-		response.Error(c, errors.NewBadRequestError("invalid input", err))
+		c.Error(errors.NewBadRequestError("invalid input", err))
 		return
 	}
 
 	address, err := h.addressService.Create(c.Request.Context(), createAddressDTO)
 	if err != nil {
-		response.Error(c, err)
+		c.Error(err)
 		return
 	}
 
@@ -63,13 +64,13 @@ func (h *AddressHandler) Create(c *gin.Context) {
 func (h *AddressHandler) GetByID(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		response.Error(c, errors.NewBadRequestError("invalid address ID"))
+		c.Error(errors.NewBadRequestError("invalid address ID"))
 		return
 	}
 
 	address, err := h.addressService.GetByID(c.Request.Context(), uint(id))
 	if err != nil {
-		response.Error(c, err)
+		c.Error(err)
 		return
 	}
 
@@ -80,24 +81,24 @@ func (h *AddressHandler) GetByID(c *gin.Context) {
 func (h *AddressHandler) Update(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		response.Error(c, errors.NewBadRequestError("invalid address ID"))
+		c.Error(errors.NewBadRequestError("invalid address ID"))
 		return
 	}
 
 	var updateAddressDTO dtos.UpdateAddressDTO
 	if err := c.ShouldBindJSON(&updateAddressDTO); err != nil {
 		if ve, ok := err.(validator.ValidationErrors); ok {
-			response.Error(c, errors.NewValidationError(&ve))
+			c.Error(errors.NewValidationError(&ve))
 			return
 		}
 
-		response.Error(c, errors.NewBadRequestError("invalid input", err))
+		c.Error(errors.NewBadRequestError("invalid input", err))
 		return
 	}
 
 	address, err := h.addressService.Update(c.Request.Context(), uint(id), updateAddressDTO)
 	if err != nil {
-		response.Error(c, err)
+		c.Error(err)
 		return
 	}
 
@@ -108,28 +109,40 @@ func (h *AddressHandler) Update(c *gin.Context) {
 func (h *AddressHandler) Delete(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		response.Error(c, errors.NewBadRequestError("invalid address ID"))
+		c.Error(errors.NewBadRequestError("invalid address ID"))
 		return
 	}
 
 	if err := h.addressService.Delete(c.Request.Context(), uint(id)); err != nil {
-		response.Error(c, err)
+		c.Error(err)
 		return
 	}
 
 	response.Success(c, http.StatusOK, nil)
 }
 
-// // List handles retrieving addresss with pagination
-// func (h *AddressHandler) List(c *gin.Context) {
-// 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-// 	pageSize, _ := strconv.Atoi(c.DefaultQuery("per_page", "10"))
+func (h *AddressHandler) ListByUserID(c *gin.Context) {
+	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	if err != nil || page <= 0 {
+		c.Error(errors.NewBadRequestError("invalid page parameter"))
+		return
+	}
+	pageSize, err := strconv.Atoi(c.DefaultQuery("per_page", "10"))
+	if err != nil || pageSize <= 0 {
+		c.Error(errors.NewBadRequestError("invalid per_page parameter"))
+		return
+	}
 
-// 	addresss, total, err := h.addressService.List(c.Request.Context(), page, pageSize)
-// 	if err != nil {
-// 		response.Error(c, err)
-// 		return
-// 	}
+	userID, err := strconv.ParseUint(c.Param("userId"), 10, 64)
+	if err != nil {
+		c.Error(errors.NewBadRequestError("invalid user ID"))
+		return
+	}
 
-// 	response.SuccessWithPagination(c, http.StatusOK, addresss, page, pageSize, total)
-// }
+	addresses, total, err := h.addressService.ListByUserID(c.Request.Context(), page, pageSize, uint(userID))
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	response.SuccessWithPagination(c, http.StatusOK, addresses, page, pageSize, total)
+}

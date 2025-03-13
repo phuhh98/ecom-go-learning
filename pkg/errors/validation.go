@@ -16,6 +16,10 @@ type validationError struct {
 	errorItems []ErrorItem
 }
 
+func (ve *validationError) Error() string {
+	return "Validation Error"
+}
+
 func (ve *validationError) Type() ErrorType {
 	return ErrorTypeBadRequest
 }
