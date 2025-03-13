@@ -33,6 +33,11 @@ func (h *ProductHandler) Register(router *gin.RouterGroup) {
 		products.GET("/:id", h.GetByID)
 		products.PUT("/:id", h.Update)
 		products.DELETE("/:id", h.Delete)
+		products.POST("/:id/items", h.CreateItemsForProduct)
+		products.GET("/items/:itemId", h.GetItemById)
+		products.GET("/:id/items", h.GetItemsForProduct)
+		products.PUT("/items/:itemId", h.UpdateItem)
+		products.DELETE("/items/:itemId", h.DeleteItem)
 	}
 }
 
@@ -131,4 +136,116 @@ func (h *ProductHandler) List(c *gin.Context) {
 	}
 
 	response.SuccessWithPagination(c, http.StatusOK, products, page, pageSize, total)
+}
+
+func (h *ProductHandler) CreateItemsForProduct(c *gin.Context) {
+	var createItemDto dtos.CreateItemsDTO
+	if err := c.ShouldBindJSON(&createItemDto); err != nil {
+
+		if ve, ok := err.(validator.ValidationErrors); ok {
+			c.Error(errors.NewValidationError(&ve))
+			return
+		}
+
+		c.Error(errors.NewBadRequestError("invalid request body"))
+		return
+	}
+
+	productId, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.Error(errors.NewBadRequestError("invalid product ID"))
+		return
+	}
+
+	createItemDto.ProductId = uint(productId)
+
+	items, err := h.productService.CreateItemsForProduct(c.Request.Context(), createItemDto)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	response.SuccessWithTotalCount(c, http.StatusCreated, items, int64(createItemDto.Quantity))
+}
+
+func (h *ProductHandler) GetItemById(c *gin.Context) {
+	itemId, err := strconv.Atoi(c.Param("itemId"))
+	if err != nil {
+		c.Error(errors.NewBadRequestError("invalid item ID"))
+		return
+	}
+
+	item, err := h.productService.GetItemById(c.Request.Context(), uint(itemId))
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	response.Success(c, http.StatusOK, item)
+}
+
+func (h *ProductHandler) GetItemsForProduct(c *gin.Context) {
+
+	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	if err != nil || page <= 0 {
+		c.Error(errors.NewBadRequestError("invalid page parameter"))
+		return
+	}
+	pageSize, err := strconv.Atoi(c.DefaultQuery("per_page", "10"))
+	if err != nil || pageSize <= 0 {
+		c.Error(errors.NewBadRequestError("invalid per_page parameter"))
+		return
+	}
+
+	productId, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.Error(errors.NewBadRequestError("invalid product ID"))
+		return
+	}
+
+	items, total, err := h.productService.GetItemsForProduct(c.Request.Context(), page, pageSize, uint(productId))
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	response.SuccessWithPagination(c, http.StatusOK, items, page, pageSize, total)
+}
+
+func (h *ProductHandler) UpdateItem(c *gin.Context) {
+	itemId, err := strconv.ParseUint(c.Param("itemId"), 10, 64)
+	if err != nil {
+		c.Error(errors.NewBadRequestError("invalid item ID"))
+		return
+	}
+	var updateItemDto dtos.UpdateItemDto
+	if err := c.ShouldBindJSON(&updateItemDto); err != nil {
+		if ve, ok := err.(validator.ValidationErrors); ok {
+			c.Error(errors.NewValidationError(&ve))
+			return
+		}
+
+		c.Error(errors.NewBadRequestError("invalid request body"))
+		return
+	}
+
+	updateItemDto.ItemId = uint(itemId)
+	item, err := h.productService.UpdateItem(c.Request.Context(), updateItemDto)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	response.Success(c, http.StatusOK, item)
+}
+
+func (h *ProductHandler) DeleteItem(c *gin.Context) {
+	itemId, err := strconv.ParseUint(c.Param("itemId"), 10, 64)
+	if err != nil {
+		c.Error(errors.NewBadRequestError("invalid item ID"))
+		return
+	}
+	err = h.productService.DeleteItem(c.Request.Context(), uint(itemId))
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	response.Success(c, http.StatusOK, "item deleted successfully")
 }

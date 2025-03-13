@@ -18,6 +18,7 @@ type Factory struct {
 	Product  ProductRepository
 	Address  AddressRepository
 	Category CategoryRepository
+	Item     ItemRepository
 }
 
 // NewFactory creates a new repository factory
@@ -41,6 +42,7 @@ func NewFactory(cfg *config.Config) (*Factory, error) {
 		Product:  NewProductRepo(db),
 		Address:  NewAddressRepo(db),
 		Category: NewCategoryRepo(db),
+		Item:     NewItemRepo(db),
 	}, nil
 }
 

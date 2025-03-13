@@ -103,6 +103,8 @@ func getErrorMsg(fe validator.FieldError) string {
 			return fmt.Sprintf("'%s' should be lowercase", v)
 		}
 		return fmt.Sprintf("Should be lowercase")
+	case "oneof":
+		return fmt.Sprintf("Should be one of these values: %s", fe.Param())
 	default:
 		return fmt.Sprintf("Field validation for '%s' failed on the '%s' tag", fe.Field(), fe.Tag())
 	}

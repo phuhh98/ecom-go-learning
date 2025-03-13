@@ -25,11 +25,25 @@ type PaginationMeta struct {
 	TotalPages int   `json:"total_pages"`
 }
 
+type TotalCountMeta struct {
+	Total int64 `json:"total"`
+}
+
 // Success sends a successful response
 func Success(c *gin.Context, statusCode int, data interface{}) {
 	c.JSON(statusCode, Response{
 		Success: true,
 		Data:    data,
+	})
+}
+
+func SuccessWithTotalCount(c *gin.Context, statusCode int, data interface{}, total int64) {
+	c.JSON(statusCode, Response{
+		Success: true,
+		Data:    data,
+		Meta: TotalCountMeta{
+			Total: total,
+		},
 	})
 }
 

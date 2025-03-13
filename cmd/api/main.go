@@ -40,7 +40,8 @@ func main() {
 	// Set up services
 	userService := service.NewUserService(repoFactory.User)
 	// TODO: Add other services here
-	productService := service.NewProductService(repoFactory.Product)
+	itemService := service.NewItemService(repoFactory.Item)
+	productService := service.NewProductService(repoFactory.Product, itemService)
 	addressService := service.NewAddressService(repoFactory.Address)
 	categoryService := service.NewCategoryService(repoFactory.Category, productService)
 

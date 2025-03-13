@@ -12,13 +12,15 @@ import (
 
 // ProductService handles business logic related to Product
 type ProductService struct {
-	repo repository.ProductRepository
+	repo        repository.ProductRepository
+	itemService *ItemService
 }
 
 // NewProductService creates a new product service
-func NewProductService(repo repository.ProductRepository) *ProductService {
+func NewProductService(repo repository.ProductRepository, itemService *ItemService) *ProductService {
 	return &ProductService{
-		repo: repo,
+		repo:        repo,
+		itemService: itemService,
 	}
 }
 
@@ -142,4 +144,53 @@ func (s *ProductService) List(ctx context.Context, page, pageSize int) ([]*model
 	}
 
 	return products, total, nil
+}
+
+func (s *ProductService) CreateItemsForProduct(ctx context.Context, createItemDto dtos.CreateItemsDTO) ([]*models.Item, error) {
+	_, err := s.repo.GetByID(ctx, createItemDto.ProductId)
+	if err != nil {
+		return nil, appError.NewNotFoundError("product not found")
+	}
+
+	// call item service to create items
+	createdItems, err := s.itemService.CreateItems(ctx, createItemDto)
+	if err != nil {
+		return nil, err
+	}
+
+	return createdItems, nil
+}
+
+func (s *ProductService) GetItemById(ctx context.Context, itemId uint) (*models.Item, error) {
+	item, err := s.itemService.GetByID(ctx, itemId)
+	if err != nil {
+		return nil, err
+	}
+
+	return item, nil
+}
+
+func (s *ProductService) GetItemsForProduct(ctx context.Context, page, pageSize int, productId uint) ([]*models.Item, int64, error) {
+	items, total, err := s.itemService.ListItemByProductId(ctx, page, pageSize, productId)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return items, total, nil
+}
+
+func (s *ProductService) UpdateItem(ctx context.Context, updateItemDto dtos.UpdateItemDto) (*models.Item, error) {
+	updatedItem, err := s.itemService.Update(ctx, updateItemDto)
+	if err != nil {
+		return nil, err
+	}
+	return updatedItem, nil
+}
+
+func (s *ProductService) DeleteItem(ctx context.Context, itemId uint) error {
+	err := s.itemService.Delete(ctx, itemId)
+	if err != nil {
+		return err
+	}
+	return nil
 }
