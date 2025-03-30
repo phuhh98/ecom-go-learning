@@ -38,29 +38,48 @@ func main() {
 	}()
 
 	// Set up services
-	userService := service.NewUserService(repoFactory.User)
+	tokenService := service.NewTokenService(cfg, repoFactory.Redis, repoFactory.User)
+	userService := service.NewUserService(repoFactory.User, cfg)
 	// TODO: Add other services here
 	itemService := service.NewItemService(repoFactory.Item)
 	productService := service.NewProductService(repoFactory.Product, itemService)
 	addressService := service.NewAddressService(repoFactory.Address)
 	categoryService := service.NewCategoryService(repoFactory.Category, productService)
+	orderService := service.NewOrderService(repoFactory.Order, repoFactory.Item)
 
-	// Set up HTTP server with Gin
-	router := setupRouter()
 
-	// Register handlers
-	api := router.Group("/api/v1")
-	userHandler := handler.NewUserHandler(userService)
-	userHandler.Register(api)
-	// TODO: Add other handlers here
+		// Set up HTTP server with Gin
+		router := setupRouter()
+
+		// Register handlers
+		api := router.Group("/api/v1")
+
+	// Create auth middleware
+	authMiddleware := middleware.NewAuthMiddleware(cfg)
+
+	// Initialize handlers
+	userHandler := handler.NewUserHandler(userService, tokenService)
+	userHandler.Register(api, authMiddleware.Authenticate())
+
 	productHandler := handler.NewProductHandler(productService)
-	productHandler.Register(api)
+	productHandler.Register(api, authMiddleware.Authenticate())
 
 	addressHandler := handler.NewAddressHandler(addressService)
-	addressHandler.Register(api)
+	addressHandler.Register(api, authMiddleware.Authenticate())
+
+	orderHandler := handler.NewOrderHandler(orderService)
+	orderHandler.Register(api, authMiddleware.Authenticate())
 
 	categoryHandler := handler.NewCategoryHandler(categoryService)
-	categoryHandler.Register(api)
+	categoryHandler.Register(api, authMiddleware.Authenticate())
+
+
+	// // Admin-only routes
+	// admin := api.Group("/admin")
+	// admin.Use(authMiddleware.Authenticate(), authMiddleware.RequireRole("admin"))
+	// {
+	// 	// Admin-only endpoints can go here
+	// }
 
 	// Create HTTP server
 	server := &http.Server{

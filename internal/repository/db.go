@@ -78,8 +78,7 @@ func createDatabaseIfNotExists(config *config.DatabaseConfig) error {
 	fmt.Printf("Name: %s\n", config.Name)
 	fmt.Printf("SSLMode: %s\n", config.SSLMode)
 	// Connect to the 'postgres' database to create our app database
-	postgresConnStr := fmt.Sprintf("host=%s user=%s password=%s dbname=postgres port=%d sslmode=%s",
-		config.Host, config.User, config.Password, config.Port, config.SSLMode)
+	postgresConnStr := config.GetDSN()
 
 	// Connect to postgres database
 

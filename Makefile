@@ -4,7 +4,7 @@
 BIN_DIR = bin
 CMD_DIR = cmd
 DOCKER_COMPOSE = docker/docker-compose.yml
-DOCKER = podman
+DOCKER = docker
 
 # Detect OS
 ifeq ($(OS),Windows_NT)

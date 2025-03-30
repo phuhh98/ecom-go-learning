@@ -26,8 +26,9 @@ func NewAddressHandler(addressService *service.AddressService) *AddressHandler {
 }
 
 // Register sets up routes for the address handler
-func (h *AddressHandler) Register(router *gin.RouterGroup) {
+func (h *AddressHandler) Register(router *gin.RouterGroup, authMiddleware gin.HandlerFunc) {
 	addresses := router.Group("/addresses")
+	addresses.Use(authMiddleware)
 	{
 		addresses.POST("", h.Create)
 		addresses.GET("/:id", h.GetByID)

@@ -25,18 +25,23 @@ func NewCategoryHandler(categoryService *service.CategoryService) *CategoryHandl
 }
 
 // Register sets up routes for the category handler
-func (h *CategoryHandler) Register(router *gin.RouterGroup) {
+func (h *CategoryHandler) Register(router *gin.RouterGroup,authMiddleware gin.HandlerFunc) {
 	categories := router.Group("/categories")
 	{
-		categories.POST("", h.Create)
 		categories.GET("", h.List)
 		categories.GET("/:id", h.GetByID)
-		categories.PUT("/:id", h.Update)
-		categories.DELETE("/:id", h.Delete)
-		categories.POST("/:id/products/:product_id", h.AddProduct)
-		categories.DELETE("/:id/products/:product_id", h.RemoveProduct)
-		categories.POST("/:id/subcategories/:subcategory_id", h.AddSubcategory)
-		categories.DELETE("/:id/subcategories/:subcategory_id", h.RemoveSubcategory)
+	}
+
+	protected := categories.Group("/")
+	protected.Use(authMiddleware)
+	{
+		protected.POST("", h.Create)
+		protected.PUT("/:id", h.Update)
+		protected.DELETE("/:id", h.Delete)
+		protected.POST("/:id/products/:product_id", h.AddProduct)
+		protected.DELETE("/:id/products/:product_id", h.RemoveProduct)
+		protected.POST("/:id/subcategories/:subcategory_id", h.AddSubcategory)
+		protected.DELETE("/:id/subcategories/:subcategory_id", h.RemoveSubcategory)
 	}
 }
 

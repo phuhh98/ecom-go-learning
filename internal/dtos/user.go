@@ -14,3 +14,9 @@ type UpdateUserDTO struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 }
+
+// LoginDTO represents the input for user login
+type LoginDTO struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
+}

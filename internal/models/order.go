@@ -1,12 +1,12 @@
 package models
 
-type Order struct {
-	BaseModel
-	// an Order belongs to an User
-	UserId uint `json:"user_id"`
-	User   User `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	// Possible value for status: created, processed, intransit, complete
-	Status string `json:"status"  gorm:"default:created"`
+import "time"
 
-	Items []Item `json:"items" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+type Order struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	UserID    uint      `json:"userId"`
+	Status    string    `json:"status"` // Use enum: created, processed, intransit, complete
+	Items     []*Item   `json:"items" gorm:"-"` // Virtual field, not stored in database
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }

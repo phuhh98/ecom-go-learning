@@ -6,6 +6,7 @@ type ItemStatusDTO struct {
 
 type CreateItemsDTO struct {
 	ProductId uint `json:"-"`
+	OrderId   *uint `json:"order_id"`
 	Quantity  int  `json:"quantity" binding:"required,min=1"`
 	ItemStatusDTO
 }

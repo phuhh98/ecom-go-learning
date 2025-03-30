@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"ecom-go/internal/config"
 	"ecom-go/internal/dtos"
 	"errors"
 
@@ -12,13 +13,15 @@ import (
 
 // UserService handles business logic related to users
 type UserService struct {
-	repo repository.UserRepository
+	repo   repository.UserRepository
+	config *config.Config
 }
 
 // NewUserService creates a new user service
-func NewUserService(repo repository.UserRepository) *UserService {
+func NewUserService(repo repository.UserRepository, config *config.Config) *UserService {
 	return &UserService{
-		repo: repo,
+		repo:   repo,
+		config: config,
 	}
 }
 
@@ -154,4 +157,30 @@ func (s *UserService) List(ctx context.Context, page, pageSize int) ([]*models.U
 	}
 
 	return users, total, nil
+}
+
+// Login authenticates a user and returns a JWT token.
+// It retrieves the user by email, compares the password, and generates a JWT token.
+func (s *UserService) Login(ctx context.Context, loginDTO dtos.LoginDTO) (string, error) {
+	// Get user by email
+	user, err := s.repo.GetByEmail(ctx, loginDTO.Email)
+	if err != nil {
+		if errors.Is(err, repository.ErrNotFound) {
+			return "", appError.NewUnauthorizedError("invalid credentials")
+		}
+		return "", appError.NewServerError("error retrieving user", err)
+	}
+
+	// Check password
+	if err := user.ComparePassword(loginDTO.Password); err != nil {
+		return "", appError.NewUnauthorizedError("invalid credentials")
+	}
+
+	// Generate JWT token
+	token, err := user.GenerateJWT(s.config.GetJWTSecret(), s.config.GetJWTAccessExpirationMinutes())
+	if err != nil {
+		return "", appError.NewServerError("error generating token", err)
+	}
+
+	return token, nil
 }

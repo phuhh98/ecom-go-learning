@@ -25,19 +25,25 @@ func NewProductHandler(productService *service.ProductService) *ProductHandler {
 }
 
 // Register sets up routes for the product handler
-func (h *ProductHandler) Register(router *gin.RouterGroup) {
+func (h *ProductHandler) Register(router *gin.RouterGroup,  authMiddleware gin.HandlerFunc ) {
 	products := router.Group("/products")
 	{
-		products.POST("", h.Create)
 		products.GET("", h.List)
 		products.GET("/:id", h.GetByID)
-		products.PUT("/:id", h.Update)
-		products.DELETE("/:id", h.Delete)
-		products.POST("/:id/items", h.CreateItemsForProduct)
 		products.GET("/items/:itemId", h.GetItemById)
 		products.GET("/:id/items", h.GetItemsForProduct)
-		products.PUT("/items/:itemId", h.UpdateItem)
-		products.DELETE("/items/:itemId", h.DeleteItem)
+	}
+
+	protected := products.Group("/")
+	protected.Use(authMiddleware)
+	{
+		protected.POST("", h.Create)
+		protected.PUT("/:id", h.Update)
+		protected.DELETE("/:id", h.Delete)
+		protected.POST("/:id/items", h.CreateItemsForProduct)
+		protected.PUT("/items/:itemId", h.UpdateItem)
+		protected.DELETE("/items/:itemId", h.DeleteItem)
+
 	}
 }
 
@@ -141,17 +147,17 @@ func (h *ProductHandler) List(c *gin.Context) {
 func (h *ProductHandler) CreateItemsForProduct(c *gin.Context) {
 	var createItemDto dtos.CreateItemsDTO
 	if err := c.ShouldBindJSON(&createItemDto); err != nil {
-
 		if ve, ok := err.(validator.ValidationErrors); ok {
 			c.Error(errors.NewValidationError(&ve))
 			return
 		}
 
-		c.Error(errors.NewBadRequestError("invalid request body"))
+		c.Error(errors.NewBadRequestError("invalid request body", err))
 		return
 	}
 
 	productId, err := strconv.Atoi(c.Param("id"))
+
 	if err != nil {
 		c.Error(errors.NewBadRequestError("invalid product ID"))
 		return

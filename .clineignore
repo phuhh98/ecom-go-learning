@@ -23,7 +23,6 @@ go.work.sum
 .DS_Store
 .idea/
 
-config.yaml
 cmd/api/tmp
 cmd/worker/tmp
 tmp/
