@@ -1,0 +1,599 @@
+openapi: 3.0.0
+info:
+  title: ecom-go-learning
+  version: 1.0.0
+servers:
+  - url: http://{{host}}
+tags:
+  - name: User
+  - name: Product
+  - name: Product > Item
+  - name: Category
+  - name: Category > Relations
+  - name: Order
+  - name: Address
+paths:
+  /api/v1/users:
+    get:
+      tags:
+        - User
+      summary: List
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+          example: '1'
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+          example: '3'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    post:
+      tags:
+        - User
+      summary: Create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                email: '{{$randomEmail}}'
+                password: '{{$randomPassword}}'
+                first_name: '{{$randomFirstName}}'
+                last_name: '{{$randomLastName}}'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/users/{userId}:
+    get:
+      tags:
+        - User
+      summary: Get By Id
+      parameters:
+        - name: userId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    put:
+      tags:
+        - User
+      summary: Update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                email: '{{$randomEmail}}'
+                first_name: '{{$randomFirstName}}'
+                last_name: '{{$randomLastName}}'
+      parameters:
+        - name: userId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    delete:
+      tags:
+        - User
+      summary: Delete Copy
+      parameters:
+        - name: userId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/products/{productId}/items:
+    post:
+      tags:
+        - Product > Item
+      summary: Create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example: "{\r\n   \"quantity\": {{$randomInt}},\r\n   \"status\": \"{{status}}\"\r\n}"
+      parameters:
+        - name: productId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    get:
+      tags:
+        - Product > Item
+      summary: List By Product Id
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+          example: '2'
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+          example: '100'
+        - name: productId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/products/items/{itemId}:
+    put:
+      tags:
+        - Product > Item
+      summary: Update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                status: avaiala
+      parameters:
+        - name: itemId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    get:
+      tags:
+        - Product > Item
+      summary: GetByID
+      parameters:
+        - name: itemId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    delete:
+      tags:
+        - Product > Item
+      summary: Delete
+      parameters:
+        - name: itemId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/products:
+    get:
+      tags:
+        - Product
+      summary: List
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+          example: '1'
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+          example: '3'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    post:
+      tags:
+        - Product
+      summary: Create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                code: '{{$randomDepartment}}.{{$randomProduct}}'
+                name: '{{$randomProductName}}'
+                description: '{{$randomLoremParagraph}}'
+                price: 10000
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/products/{productId}:
+    get:
+      tags:
+        - Product
+      summary: Get By Id Copy
+      parameters:
+        - name: productId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    put:
+      tags:
+        - Product
+      summary: Update Copy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example: "{\r\n   \"code\": \"{{productCode}}\",\r\n   \"name\": \"{{$randomProductName}}\",\r\n   \"description\": \"{{$randomLoremParagraph}}\",\r\n   \"price\": {{$randomPrice}}\r\n}"
+      parameters:
+        - name: productId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    delete:
+      tags:
+        - Product
+      summary: Delete Copy
+      parameters:
+        - name: productId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/categories/{categoryId}/products/{productId}:
+    post:
+      tags:
+        - Category > Relations
+      summary: Add Product
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: '{{$randomProductName}}'
+                description: '{{$randomLoremParagraph}}'
+      parameters:
+        - name: categoryId
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: productId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    delete:
+      tags:
+        - Category > Relations
+      summary: Delete Product
+      parameters:
+        - name: categoryId
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: productId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/categories/{categoryId}/subcategories/{subcategoryId}:
+    post:
+      tags:
+        - Category > Relations
+      summary: Add Subcategory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: '{{$randomProductName}}'
+                description: '{{$randomLoremParagraph}}'
+      parameters:
+        - name: categoryId
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: subcategoryId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    delete:
+      tags:
+        - Category > Relations
+      summary: Delete Subcategory
+      parameters:
+        - name: categoryId
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: subcategoryId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/categories:
+    get:
+      tags:
+        - Category
+      summary: List
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+          example: '1'
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+          example: '3'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    post:
+      tags:
+        - Category
+      summary: Create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: '{{$randomProductName}}'
+                description: '{{$randomLoremParagraph}}'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/categories/{categoryId}:
+    get:
+      tags:
+        - Category
+      summary: Get By Id Copy
+      parameters:
+        - name: categoryId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    put:
+      tags:
+        - Category
+      summary: Update Copy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: '{{$randomProductName}}'
+                description: '{{$randomLoremParagraph}}'
+      parameters:
+        - name: categoryId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    delete:
+      tags:
+        - Category
+      summary: Delete Copy
+      parameters:
+        - name: categoryId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/addresses:
+    post:
+      tags:
+        - Address
+      summary: Create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example: "{\r\n    \"user_id\": {{userId}},\r\n    \"full_name\": \"{{$randomFullName}}\",\r\n    \"phone_number\": \"{{$randomPhoneNumber}}\",\r\n    \"address_line\": \"{{$randomStreetAddress}}\"\r\n}"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/addresses/{addressId}:
+    get:
+      tags:
+        - Address
+      summary: Get By Id
+      parameters:
+        - name: addressId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    put:
+      tags:
+        - Address
+      summary: Update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                full_name: '{{$randomFullName}}'
+                phone_number: '{{$randomPhoneNumber}}'
+                address_line: '{{$randomStreetAddress}}'
+      parameters:
+        - name: addressId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    delete:
+      tags:
+        - Address
+      summary: Delete
+      parameters:
+        - name: addressId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/addresses/user/{userId}:
+    get:
+      tags:
+        - Address
+      summary: List by User Id
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+          example: '1'
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+          example: '10'
+        - name: userId
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /health:
+    get:
+      tags:
+        - default
+      summary: Health
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}

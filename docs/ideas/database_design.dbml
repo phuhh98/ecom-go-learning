@@ -1,0 +1,80 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table users {
+  id bigserial [primary key]
+  email text
+  password text
+  first_name text
+  last_name text
+  role text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table addresses {
+  id bigserial [primary key]
+  userId bigserial [ref: > users.id]
+  name text
+  phoneNumber text
+  addressline text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table products {
+  id bigserial [primary key]
+  code text
+  name text
+  description text
+  price number
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table prodAndCatgories {
+  id bigserial [primary key]
+  productId bigserial [ref: > products.id]
+  categoryId bigserial [ref: > categories.id]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table categories {
+  id bigserial [primary key]
+  name text unique
+  description text
+  subCategories bigserial[] [ref: > categories.id]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table orders {
+  id bigserial [primary key]
+  userId bigserial [ref: > users.id]
+  status orderStatus
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table items {
+  id bigserial [primary key]
+  productId bigserial [ref: > products.id]
+  status itemStatus
+  orderId bigserial [ref: > orders.id]
+  created_at timestamp
+  updated_at timestamp
+}
+
+
+Enum itemStatus {
+  available
+  sold
+}
+
+Enum orderStatus {
+  created
+  processed
+  instransit
+  complete
+}

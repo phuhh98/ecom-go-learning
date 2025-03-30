@@ -1,0 +1,1277 @@
+{
+	"info": {
+		"_postman_id": "97105466-56c2-4824-b6bf-ebc065a56bed",
+		"name": "ecom-go-learning",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "14333033"
+	},
+	"item": [
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "List",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const resBody = pm.response.json()\r",
+									"\r",
+									"pm.environment.set(\"user\", resBody.data[1].email)\r",
+									"pm.environment.set(\"userId\", resBody.data[1].id)"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/api/v1/users?page=1&per_page=3",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "per_page",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const resBody = pm.response.json()\r",
+									"\r",
+									"pm.environment.set(\"user\", resBody.data.email)\r",
+									"pm.environment.set(\"userId\", resBody.data.id)"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"{{$randomEmail}}\",\r\n    \"password\": \"{{$randomPassword}}\",\r\n    \"first_name\": \"{{$randomFirstName}}\",\r\n    \"last_name\": \"{{$randomLastName}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/v1/users",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get By Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/api/v1/users/{{userId}}",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"{{$randomEmail}}\",\r\n    \"first_name\": \"{{$randomFirstName}}\",\r\n    \"last_name\": \"{{$randomLastName}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/v1/users/{{userId}}",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/api/v1/users/{{userId}}",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Copy",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/api/v1/users/{{userId}}",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Product",
+			"item": [
+				{
+					"name": "Item",
+					"item": [
+						{
+							"name": "Create",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// const resBody = pm.response.json()\r",
+											"\r",
+											"// pm.environment.set(\"productId\", resBody.data.id)\r",
+											"// pm.environment.set(\"productCode\", resBody.data.code)"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Sample array of values\r",
+											"const statuses = [\"available\", \"sold\"];\r",
+											"\r",
+											"// Generate a random index within the range of the array\r",
+											"const randomIndex = Math.floor(Math.random() * statuses.length);\r",
+											"\r",
+											"// Select the random value from the array\r",
+											"const randomValue = statuses[randomIndex];\r",
+											"pm.variables.set(\"status\", randomValue)\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n   \"quantity\": {{$randomInt}},\r\n   \"status\": \"{{status}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/v1/products/{{productId}}/items",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"products",
+										"{{productId}}",
+										"items"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// const resBody = pm.response.json()\r",
+											"\r",
+											"// pm.environment.set(\"productId\", resBody.data.id)\r",
+											"// pm.environment.set(\"productCode\", resBody.data.code)"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Sample array of values\r",
+											"const statuses = [\"available\", \"sold\"];\r",
+											"\r",
+											"// Generate a random index within the range of the array\r",
+											"const randomIndex = Math.floor(Math.random() * statuses.length);\r",
+											"\r",
+											"// Select the random value from the array\r",
+											"const randomValue = statuses[randomIndex];\r",
+											"pm.variables.set(\"status\", randomValue)\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n   \"status\": \"avaiala\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/v1/products/items/{{itemId}}",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"products",
+										"items",
+										"{{itemId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GetByID",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// const resBody = pm.response.json()\r",
+											"\r",
+											"// pm.environment.set(\"productId\", resBody.data.id)\r",
+											"// pm.environment.set(\"productCode\", resBody.data.code)"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Sample array of values\r",
+											"const statuses = [\"available\", \"sold\"];\r",
+											"\r",
+											"// Generate a random index within the range of the array\r",
+											"const randomIndex = Math.floor(Math.random() * statuses.length);\r",
+											"\r",
+											"// Select the random value from the array\r",
+											"const randomValue = statuses[randomIndex];\r",
+											"pm.variables.set(\"status\", randomValue)\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// {\r\n//    \"quantity\": {{$randomInt}},\r\n//    \"status\": \"{{status}}\"\r\n// }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/v1/products/items/{{itemId}}",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"products",
+										"items",
+										"{{itemId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// const resBody = pm.response.json()\r",
+											"\r",
+											"// pm.environment.set(\"productId\", resBody.data.id)\r",
+											"// pm.environment.set(\"productCode\", resBody.data.code)"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Sample array of values\r",
+											"const statuses = [\"available\", \"sold\"];\r",
+											"\r",
+											"// Generate a random index within the range of the array\r",
+											"const randomIndex = Math.floor(Math.random() * statuses.length);\r",
+											"\r",
+											"// Select the random value from the array\r",
+											"const randomValue = statuses[randomIndex];\r",
+											"pm.variables.set(\"status\", randomValue)\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// {\r\n//    \"quantity\": {{$randomInt}},\r\n//    \"status\": \"{{status}}\"\r\n// }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/v1/products/items/{{itemId}}",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"products",
+										"items",
+										"{{itemId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "List By Product Id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// const resBody = pm.response.json()\r",
+											"\r",
+											"// pm.environment.set(\"productId\", resBody.data.id)\r",
+											"// pm.environment.set(\"productCode\", resBody.data.code)"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Sample array of values\r",
+											"const statuses = [\"available\", \"sold\"];\r",
+											"\r",
+											"// Generate a random index within the range of the array\r",
+											"const randomIndex = Math.floor(Math.random() * statuses.length);\r",
+											"\r",
+											"// Select the random value from the array\r",
+											"const randomValue = statuses[randomIndex];\r",
+											"pm.variables.set(\"status\", randomValue)\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// {\r\n//    \"quantity\": {{$randomInt}},\r\n//    \"status\": \"{{status}}\"\r\n// }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/v1/products/{{productId}}/items?page=2&per_page=100",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"products",
+										"{{productId}}",
+										"items"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "2"
+										},
+										{
+											"key": "per_page",
+											"value": "100"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "List",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// const resBody = pm.response.json()\r",
+									"\r",
+									"// pm.environment.set(\"user\", resBody.data[1].email)\r",
+									"// pm.environment.set(\"userId\", resBody.data[1].id)"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/api/v1/products?page=1&per_page=3",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "per_page",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const resBody = pm.response.json()\r",
+									"\r",
+									"pm.environment.set(\"productId\", resBody.data.id)\r",
+									"pm.environment.set(\"productCode\", resBody.data.code)"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n   \"code\": \"{{$randomDepartment}}.{{$randomProduct}}\",\r\n   \"name\": \"{{$randomProductName}}\",\r\n   \"description\": \"{{$randomLoremParagraph}}\",\r\n   \"price\": 10000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/v1/products",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get By Id Copy",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/api/v1/products/{{productId}}",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"{{productId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Copy",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n   \"code\": \"{{productCode}}\",\r\n   \"name\": \"{{$randomProductName}}\",\r\n   \"description\": \"{{$randomLoremParagraph}}\",\r\n   \"price\": {{$randomPrice}}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/v1/products/{{productId}}",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"{{productId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Copy",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/api/v1/products/{{productId}}",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"{{productId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Category",
+			"item": [
+				{
+					"name": "Relations",
+					"item": [
+						{
+							"name": "Add Product",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const resBody = pm.response.json()\r",
+											"\r",
+											"pm.environment.set(\"categoryId\", resBody.data.id)\r",
+											"// pm.environment.set(\"productCode\", resBody.data.code)"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n//    \"code\": \"{{$randomDepartment}}.{{$randomProduct}}\",\r\n   \"name\": \"{{$randomProductName}}\",\r\n   \"description\": \"{{$randomLoremParagraph}}\"\r\n//    \"price\": {{$randomPrice}}\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/v1/categories/{{categoryId}}/products/{{productId}}",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"categories",
+										"{{categoryId}}",
+										"products",
+										"{{productId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Product",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const resBody = pm.response.json()\r",
+											"\r",
+											"pm.environment.set(\"categoryId\", resBody.data.id)\r",
+											"// pm.environment.set(\"productCode\", resBody.data.code)"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n//    \"code\": \"{{$randomDepartment}}.{{$randomProduct}}\",\r\n   \"name\": \"{{$randomProductName}}\",\r\n   \"description\": \"{{$randomLoremParagraph}}\"\r\n//    \"price\": {{$randomPrice}}\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/v1/categories/{{categoryId}}/products/{{productId}}",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"categories",
+										"{{categoryId}}",
+										"products",
+										"{{productId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add Subcategory",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const resBody = pm.response.json()\r",
+											"\r",
+											"pm.environment.set(\"categoryId\", resBody.data.id)\r",
+											"// pm.environment.set(\"productCode\", resBody.data.code)"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n//    \"code\": \"{{$randomDepartment}}.{{$randomProduct}}\",\r\n   \"name\": \"{{$randomProductName}}\",\r\n   \"description\": \"{{$randomLoremParagraph}}\"\r\n//    \"price\": {{$randomPrice}}\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/v1/categories/{{categoryId}}/subcategories/{{subcategoryId}}",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"categories",
+										"{{categoryId}}",
+										"subcategories",
+										"{{subcategoryId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Subcategory",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const resBody = pm.response.json()\r",
+											"\r",
+											"pm.environment.set(\"categoryId\", resBody.data.id)\r",
+											"// pm.environment.set(\"productCode\", resBody.data.code)"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n//    \"code\": \"{{$randomDepartment}}.{{$randomProduct}}\",\r\n   \"name\": \"{{$randomProductName}}\",\r\n   \"description\": \"{{$randomLoremParagraph}}\"\r\n//    \"price\": {{$randomPrice}}\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/v1/categories/{{categoryId}}/subcategories/{{subcategoryId}}",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"categories",
+										"{{categoryId}}",
+										"subcategories",
+										"{{subcategoryId}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "List",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const resBody = pm.response.json()\r",
+									"\r",
+									"// pm.environment.set(\"user\", resBody.data[1].email)\r",
+									"pm.environment.set(\"categoryId\", resBody.data[1].id)"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/api/v1/categories?page=1&per_page=3",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"categories"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "per_page",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const resBody = pm.response.json()\r",
+									"\r",
+									"pm.environment.set(\"categoryId\", resBody.data.id)\r",
+									"// pm.environment.set(\"productCode\", resBody.data.code)"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n//    \"code\": \"{{$randomDepartment}}.{{$randomProduct}}\",\r\n   \"name\": \"{{$randomProductName}}\",\r\n   \"description\": \"{{$randomLoremParagraph}}\"\r\n//    \"price\": {{$randomPrice}}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/v1/categories",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get By Id Copy",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/api/v1/categories/{{categoryId}}",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"categories",
+								"{{categoryId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Copy",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n//    \"code\": \"{{productCode}}\",\r\n   \"name\": \"{{$randomProductName}}\",\r\n   \"description\": \"{{$randomLoremParagraph}}\"\r\n//    \"price\": {{$randomPrice}}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/v1/categories/{{categoryId}}",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"categories",
+								"{{categoryId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Copy",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/api/v1/categories/{{categoryId}}",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"categories",
+								"{{categoryId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Order",
+			"item": []
+		},
+		{
+			"name": "Address",
+			"item": [
+				{
+					"name": "Create",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const resBody = pm.response.json()\r",
+									"\r",
+									"pm.environment.set(\"addressId\", resBody.data.id)"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user_id\": {{userId}},\r\n    \"full_name\": \"{{$randomFullName}}\",\r\n    \"phone_number\": \"{{$randomPhoneNumber}}\",\r\n    \"address_line\": \"{{$randomStreetAddress}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/v1/addresses",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"addresses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get By Id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const resBody = pm.response.json()\r",
+									"\r",
+									"pm.environment.set(\"addressId\", resBody.data.id)"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/v1/addresses/{{addressId}}",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"addresses",
+								"{{addressId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List by User Id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const resBody = pm.response.json()\r",
+									"\r",
+									"pm.environment.set(\"addressId\", resBody.data.id)"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/v1/addresses/user/{{userId}}?page=1&per_page=10",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"addresses",
+								"user",
+								"{{userId}}"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "per_page",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const resBody = pm.response.json()\r",
+									"\r",
+									"pm.environment.set(\"addressId\", resBody.data.id)"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"full_name\": \"{{$randomFullName}}\",\r\n    \"phone_number\": \"{{$randomPhoneNumber}}\",\r\n    \"address_line\": \"{{$randomStreetAddress}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/v1/addresses/{{addressId}}",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"addresses",
+								"{{addressId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/api/v1/addresses/{{addressId}}",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"addresses",
+								"{{addressId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Health",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/health",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"health"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
