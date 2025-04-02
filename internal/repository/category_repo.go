@@ -39,7 +39,7 @@ func (r *CategoryRepo) Create(ctx context.Context, category *models.Category) er
 // GetByID retrieves a category by ID
 func (r *CategoryRepo) GetByID(ctx context.Context, id uint) (*models.Category, error) {
 	var category models.Category
-	result := r.db.WithContext(ctx).Preload(clause.Associations).First(&category, id)
+	result := r.db.WithContext(ctx).Preload(clause.Associations).Preload("SubCategories").First(&category, id)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, ErrNotFound

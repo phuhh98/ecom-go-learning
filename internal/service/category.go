@@ -102,6 +102,9 @@ func (s *CategoryService) Update(ctx context.Context, categoryID uint, updateCat
 	}
 
 	updatedCategory, err := s.GetByID(ctx, categoryID)
+	if err != nil{ 
+		return nil, appError.NewServerError("error retrieving updated category", err)
+	}
 	return updatedCategory, nil
 }
 
@@ -166,6 +169,9 @@ func (s *CategoryService) AddProductToCategory(ctx context.Context, categoryID u
 		return nil, appError.NewServerError("error updating category", err)
 	}
 	updatedCategory, err := s.GetByID(ctx, categoryID)
+	if err != nil {
+		return nil, appError.NewServerError("error retrieving updated category", err)
+	}
 	return updatedCategory, nil
 }
 
@@ -179,7 +185,7 @@ func (s *CategoryService) RemoveProductFromCategory(ctx context.Context, categor
 		return nil, appError.NewNotFoundError("product not found")
 	}
 	// Check if product exists in category
-	var index int
+	var index int = -1
 	for i, p := range category.Products {
 		if p.ID == productID {
 			index = i
@@ -198,6 +204,9 @@ func (s *CategoryService) RemoveProductFromCategory(ctx context.Context, categor
 		return nil, appError.NewServerError("error updating category", err)
 	}
 	updatedCategory, err := s.GetByID(ctx, categoryID)
+	if err != nil {
+		return nil, appError.NewServerError("error retrieving updated category", err)
+	}
 	return updatedCategory, nil
 }
 
@@ -226,6 +235,9 @@ func (s *CategoryService) AddSubcategoryToCategory(ctx context.Context, category
 		return nil, appError.NewServerError("error updating category", err)
 	}
 	updatedCategory, err := s.GetByID(ctx, categoryID)
+	if err != nil {
+		return nil, appError.NewServerError("error retrieving updated category", err)	
+	}
 	return updatedCategory, nil
 }
 
@@ -233,6 +245,19 @@ func (s *CategoryService) RemoveSubcategoryFromCategory(ctx context.Context, cat
 	category, err := s.GetByID(ctx, categoryID)
 	if err != nil {
 		return nil, appError.NewNotFoundError("category not found")
+	}
+
+	// Check if subcategory exists in category
+	var index int = -1
+	for i, sc := range category.SubCategories {
+		if sc.ID == subcategoryID {
+			index = i
+			break
+		}
+	}
+
+	if index == -1 {
+		return nil, appError.NewBadRequestError("subcategory does not exist in category")
 	}
 
 	_, err = s.GetByID(ctx, subcategoryID)
@@ -253,5 +278,7 @@ func (s *CategoryService) RemoveSubcategoryFromCategory(ctx context.Context, cat
 		return nil, appError.NewServerError("error updating category", err)
 	}
 	updatedCategory, err := s.GetByID(ctx, categoryID)
+	if err != nil {
+		return nil, appError.NewServerError("error retrieving updated category", err)	}
 	return updatedCategory, nil
 }

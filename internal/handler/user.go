@@ -28,7 +28,7 @@ func NewUserHandler(userService *service.UserService, tokenService *service.Toke
 }
 
 // Register sets up routes for the user handler
-func (h *UserHandler) Register(router *gin.RouterGroup, authMiddleware gin.HandlerFunc ) {
+func (h *UserHandler) Register(router *gin.RouterGroup, authMiddleware gin.HandlerFunc) {
 	users := router.Group("/users")
 	{
 		users.POST("", h.Create)
@@ -45,6 +45,7 @@ func (h *UserHandler) Register(router *gin.RouterGroup, authMiddleware gin.Handl
 		protected.PUT("/:id", h.Update)
 		protected.DELETE("/:id", h.Delete)
 	}
+
 }
 
 // Login handles user login

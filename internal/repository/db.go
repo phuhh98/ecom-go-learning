@@ -130,7 +130,7 @@ func AutoMigrate(db *gorm.DB) error {
 		&models.Product{},
 		&models.Category{},
 		&models.Order{},
-		&models.Item{},
+		&models.OrderItem{},
 		&models.Address{},
 	)
 

@@ -1,92 +1,92 @@
 package service
 
 import (
+	"context"
+	"ecom-go/internal/dtos"
 	"ecom-go/internal/models"
 	"ecom-go/internal/repository"
-	"errors"
+	appError "ecom-go/pkg/errors"
 )
 
 type OrderService struct {
 	orderRepo repository.OrderRepository
-	itemRepo  repository.ItemRepository
+	productService *ProductService
 }
 
-func NewOrderService(orderRepo repository.OrderRepository, itemRepo repository.ItemRepository) *OrderService {
+func NewOrderService(orderRepo repository.OrderRepository, productService *ProductService ) *OrderService {
 	return &OrderService{
 		orderRepo: orderRepo,
-		itemRepo:  itemRepo,
+		productService: productService,
 	}
 }
 
-func (s *OrderService) ListOrders(page int, perPage int) ([]models.Order, error) {
-	return s.orderRepo.ListOrders(page, perPage)
-}
+// func (s *OrderService) ListOrders(page int, perPage int) ([]models.Order, error) {
+// 	return s.orderRepo.ListOrders(page, perPage)
+// }
 
-func (s *OrderService) CreateOrder(order *models.Order, itemIDs []uint) error {
-	// Create the order first
-	if err := s.orderRepo.CreateOrder(order); err != nil {
-		return err
+func (s *OrderService) Create(ctx context.Context, createOrderDTO dtos.CreateOrderDTO) (*models.Order, error) {
+	order := &models.Order{
+		UserID: createOrderDTO.UserID,
+		Status: "created",
+		Items: []*models.OrderItem{},
 	}
-
-	// Associate items with the order
-	for _, itemID := range itemIDs {
-		item, err := s.itemRepo.GetByID(nil, itemID)
+	// Check list of product whether products exist
+	for _, item := range createOrderDTO.Items {
+		product, err := s.productService.GetByID(nil, item.ProductID)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
-		// Check if item is available
-		if item.Status != "available" {
-			return errors.New("item is not available")
-		}
-
-		// Update item to associate with order and mark as sold
-		item.OrderID = &order.ID
-		item.Status = "sold"
-		if err := s.itemRepo.Update(nil, item); err != nil {
-			return err
-		}
+		order.Items = append(order.Items, &models.OrderItem{
+			Product: *product,
+			Quantity:  item.Quantity,
+		})
 	}
 
-	return nil
-}
 
-func (s *OrderService) GetOrderById(id uint) (*models.Order, error) {
-	order, err := s.orderRepo.GetOrderById(id)
-	if err != nil {
-		return nil, err
+	if err := s.orderRepo.Create(ctx, order); err != nil {
+		return nil, appError.NewServerError("error creating order", err)
 	}
 
-	// Get items associated with this order
-	items, err := s.orderRepo.GetOrderItems(id)
-	if err != nil {
-		return nil, err
-	}
-
-	// Attach items to the order
-	order.Items = items
 	return order, nil
 }
 
-func (s *OrderService) UpdateOrder(order *models.Order) error {
-	return s.orderRepo.UpdateOrder(order)
-}
+// func (s *OrderService) GetOrderById(id uint) (*models.Order, error) {
+// 	order, err := s.orderRepo.GetOrderById(id)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-func (s *OrderService) DeleteOrder(id uint) error {
-	// Get items associated with this order
-	items, err := s.orderRepo.GetOrderItems(id)
-	if err != nil {
-		return err
-	}
+// 	// Get items associated with this order
+// 	items, err := s.orderRepo.GetOrderItems(id)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	// Update items to disassociate from order and mark as available
-	for _, item := range items {
-		item.OrderID = nil
-		item.Status = "available"
-		if err := s.itemRepo.Update(nil, item); err != nil {
-			return err
-		}
-	}
+// 	// Attach items to the order
+// 	order.Items = items
+// 	return order, nil
+// }
 
-	return s.orderRepo.DeleteOrder(id)
-}
+// func (s *OrderService) UpdateOrder(order *models.Order) error {
+// 	return s.orderRepo.UpdateOrder(order)
+// }
+
+// func (s *OrderService) DeleteOrder(id uint) error {
+// 	// Get items associated with this order
+// 	items, err := s.orderRepo.GetOrderItems(id)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	// Update items to disassociate from order and mark as available
+// 	for _, item := range items {
+// 		item.OrderID = nil
+// 		item.Status = "available"
+// 		if err := s.itemRepo.Update(nil, item); err != nil {
+// 			return err
+// 		}
+// 	}
+
+// 	return s.orderRepo.DeleteOrder(id)
+// }

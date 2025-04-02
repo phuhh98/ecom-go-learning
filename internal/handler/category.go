@@ -25,23 +25,23 @@ func NewCategoryHandler(categoryService *service.CategoryService) *CategoryHandl
 }
 
 // Register sets up routes for the category handler
-func (h *CategoryHandler) Register(router *gin.RouterGroup,authMiddleware gin.HandlerFunc) {
+func (h *CategoryHandler) Register(router *gin.RouterGroup, authMiddleware gin.HandlerFunc, adminValidation gin.HandlerFunc) {
 	categories := router.Group("/categories")
 	{
 		categories.GET("", h.List)
 		categories.GET("/:id", h.GetByID)
 	}
 
-	protected := categories.Group("/")
-	protected.Use(authMiddleware)
+	adminProtected := categories.Group("/")
+	adminProtected.Use(authMiddleware, adminValidation)
 	{
-		protected.POST("", h.Create)
-		protected.PUT("/:id", h.Update)
-		protected.DELETE("/:id", h.Delete)
-		protected.POST("/:id/products/:product_id", h.AddProduct)
-		protected.DELETE("/:id/products/:product_id", h.RemoveProduct)
-		protected.POST("/:id/subcategories/:subcategory_id", h.AddSubcategory)
-		protected.DELETE("/:id/subcategories/:subcategory_id", h.RemoveSubcategory)
+		adminProtected.PUT("/:id", h.Update)
+		adminProtected.DELETE("/:id", h.Delete)
+		adminProtected.POST("", h.Create)
+		adminProtected.POST("/:id/products/:product_id", h.AddProduct)
+		adminProtected.DELETE("/:id/products/:product_id", h.RemoveProduct)
+		adminProtected.POST("/:id/subcategories/:subcategory_id", h.AddSubcategory)
+		adminProtected.DELETE("/:id/subcategories/:subcategory_id", h.RemoveSubcategory)
 	}
 }
 
@@ -194,6 +194,11 @@ func (h *CategoryHandler) AddSubcategory(c *gin.Context) {
 	subcategoryId, err := strconv.ParseUint(c.Param("subcategory_id"), 10, 64)
 	if err != nil {
 		c.Error(errors.NewBadRequestError("invalid subcategory ID"))
+		return
+	}
+	// Subcategory Id should not be the same as category Id
+	if categoryId == subcategoryId {
+		c.Error(errors.NewBadRequestError("category ID and subcategory ID should not be the same"))
 		return
 	}
 

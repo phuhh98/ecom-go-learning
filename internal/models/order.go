@@ -1,12 +1,16 @@
 package models
 
-import "time"
-
 type Order struct {
-	ID        uint      `gorm:"primaryKey" json:"id"`
-	UserID    uint      `json:"userId"`
-	Status    string    `json:"status"` // Use enum: created, processed, intransit, complete
-	Items     []*Item   `json:"items" gorm:"-"` // Virtual field, not stored in database
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	BaseModel
+	UserID uint         `json:"userId" gorm:"not null;"`
+	Status string       `json:"status" gorm:"not null;"` // Use enum: created, processed, intransit, complete, cancelled
+	Items  []*OrderItem `json:"items"`
+}
+
+type OrderItem struct {
+	BaseModel
+	OrderID   uint    `json:"order_id" gorm:"not null;constraint:OnDelete:CASCADE,OnUpdate:CASCADE;"`
+	ProductID uint    `json:"productId" gorm:"not null;constraint:OnDelete:CASCADE,OnUpdate:CASCADE;"`
+	Product   Product `json:"product" gorm:"not null;"`
+	Quantity  uint    `json:"quantity"`
 }

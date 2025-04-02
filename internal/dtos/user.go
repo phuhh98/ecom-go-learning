@@ -13,6 +13,7 @@ type UpdateUserDTO struct {
 	Email     string `json:"email" binding:"omitempty,email"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
+	Role string `json:"role" binding:"oneof=admin user"` // Role can be either "admin" or "user"
 }
 
 // LoginDTO represents the input for user login

@@ -41,11 +41,10 @@ func main() {
 	tokenService := service.NewTokenService(cfg, repoFactory.Redis, repoFactory.User)
 	userService := service.NewUserService(repoFactory.User, cfg)
 	// TODO: Add other services here
-	itemService := service.NewItemService(repoFactory.Item)
-	productService := service.NewProductService(repoFactory.Product, itemService)
+	productService := service.NewProductService(repoFactory.Product)
 	addressService := service.NewAddressService(repoFactory.Address)
 	categoryService := service.NewCategoryService(repoFactory.Category, productService)
-	orderService := service.NewOrderService(repoFactory.Order, repoFactory.Item)
+	orderService := service.NewOrderService(repoFactory.Order, productService)
 
 
 		// Set up HTTP server with Gin
@@ -62,7 +61,7 @@ func main() {
 	userHandler.Register(api, authMiddleware.Authenticate())
 
 	productHandler := handler.NewProductHandler(productService)
-	productHandler.Register(api, authMiddleware.Authenticate())
+	productHandler.Register(api, authMiddleware.Authenticate(), authMiddleware.RequireRole("admin"))
 
 	addressHandler := handler.NewAddressHandler(addressService)
 	addressHandler.Register(api, authMiddleware.Authenticate())
@@ -71,7 +70,7 @@ func main() {
 	orderHandler.Register(api, authMiddleware.Authenticate())
 
 	categoryHandler := handler.NewCategoryHandler(categoryService)
-	categoryHandler.Register(api, authMiddleware.Authenticate())
+	categoryHandler.Register(api, authMiddleware.Authenticate(), authMiddleware.RequireRole("admin"))
 
 
 	// // Admin-only routes
