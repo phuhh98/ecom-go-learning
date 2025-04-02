@@ -15,8 +15,11 @@ import (
 	"ecom-go/internal/repository"
 	"ecom-go/internal/service"
 	"ecom-go/pkg/logger"
+	"ecom-go/pkg/validators"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 )
 
 func main() {
@@ -44,7 +47,7 @@ func main() {
 	productService := service.NewProductService(repoFactory.Product)
 	addressService := service.NewAddressService(repoFactory.Address)
 	categoryService := service.NewCategoryService(repoFactory.Category, productService)
-	orderService := service.NewOrderService(repoFactory.Order, productService)
+	orderService := service.NewOrderService(repoFactory.Order, productService, userService)
 
 	// Set up HTTP server with Gin
 	router := setupRouter()
@@ -124,6 +127,10 @@ func setupRouter() *gin.Engine {
 
 	router := gin.New()
 
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("default", validators.Default)
+	}
+
 	// Add middlewares
 	router.Use(middleware.Logger())
 	router.Use(gin.Recovery())
@@ -139,3 +146,5 @@ func setupRouter() *gin.Engine {
 
 	return router
 }
+
+

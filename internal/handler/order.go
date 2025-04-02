@@ -69,6 +69,13 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 		return
 	}
 
+	userId, ok := c.Get("user_id")
+	if !ok {
+		c.Error(errors.NewBadRequestError("user ID not found in context"))
+		return
+	}
+	createOrderDTO.UserID = userId.(uint)
+
 	order, err := h.orderService.Create(c.Request.Context(), createOrderDTO)
 	if err != nil {
 		c.Error(err)
