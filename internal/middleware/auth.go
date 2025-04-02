@@ -28,13 +28,13 @@ func (m *AuthMiddleware) getToken(c *gin.Context) (string, error) {
 	if authHeader != "" && strings.HasPrefix(authHeader, "Bearer ") {
 		return strings.TrimPrefix(authHeader, "Bearer "), nil
 	}
-	
+
 	// Try cookie
 	token, err := c.Cookie("access_token")
 	if err == nil && token != "" {
 		return token, nil
 	}
-	
+
 	return "", errors.NewUnauthorizedError("no valid authentication token found")
 }
 
@@ -48,7 +48,7 @@ func (m *AuthMiddleware) Authenticate() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		
+
 		// Parse and validate the token
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			// Validate signing method
@@ -57,7 +57,7 @@ func (m *AuthMiddleware) Authenticate() gin.HandlerFunc {
 			}
 			return []byte(m.config.GetJWTSecret()), nil
 		})
-		
+
 		// Handle token validation errors
 		if err != nil {
 			// Check if the error is due to an expired token
@@ -69,13 +69,13 @@ func (m *AuthMiddleware) Authenticate() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		
+
 		if !token.Valid {
 			c.Error(errors.NewUnauthorizedError("invalid token"))
 			c.Abort()
 			return
 		}
-		
+
 		// Extract claims
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
@@ -83,7 +83,7 @@ func (m *AuthMiddleware) Authenticate() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		
+
 		// Set user info in context for handlers
 		userID, ok := claims["user_id"].(float64)
 		if !ok {
@@ -91,19 +91,19 @@ func (m *AuthMiddleware) Authenticate() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		
-		c.Set("userID", uint(userID))
-		
+
+		c.Set("user_id", uint(userID))
+
 		// Set email if present in token
 		if email, ok := claims["email"].(string); ok {
 			c.Set("email", email)
 		}
-		
+
 		// Set role if present in token
 		if role, ok := claims["role"].(string); ok {
 			c.Set("role", role)
 		}
-		
+
 		c.Next()
 	}
 }
@@ -118,14 +118,14 @@ func (m *AuthMiddleware) RequireRole(roles ...string) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		
+
 		userRole, ok := role.(string)
 		if !ok {
 			c.Error(errors.NewUnauthorizedError("invalid role type"))
 			c.Abort()
 			return
 		}
-		
+
 		// Check if user has any of the required roles
 		hasRole := false
 		for _, r := range roles {
@@ -134,13 +134,13 @@ func (m *AuthMiddleware) RequireRole(roles ...string) gin.HandlerFunc {
 				break
 			}
 		}
-		
+
 		if !hasRole {
 			c.Error(errors.NewForbiddenError("insufficient permissions"))
 			c.Abort()
 			return
 		}
-		
+
 		c.Next()
 	}
 }

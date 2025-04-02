@@ -102,7 +102,7 @@ func (s *CategoryService) Update(ctx context.Context, categoryID uint, updateCat
 	}
 
 	updatedCategory, err := s.GetByID(ctx, categoryID)
-	if err != nil{ 
+	if err != nil {
 		return nil, appError.NewServerError("error retrieving updated category", err)
 	}
 	return updatedCategory, nil
@@ -236,7 +236,7 @@ func (s *CategoryService) AddSubcategoryToCategory(ctx context.Context, category
 	}
 	updatedCategory, err := s.GetByID(ctx, categoryID)
 	if err != nil {
-		return nil, appError.NewServerError("error retrieving updated category", err)	
+		return nil, appError.NewServerError("error retrieving updated category", err)
 	}
 	return updatedCategory, nil
 }
@@ -279,6 +279,7 @@ func (s *CategoryService) RemoveSubcategoryFromCategory(ctx context.Context, cat
 	}
 	updatedCategory, err := s.GetByID(ctx, categoryID)
 	if err != nil {
-		return nil, appError.NewServerError("error retrieving updated category", err)	}
+		return nil, appError.NewServerError("error retrieving updated category", err)
+	}
 	return updatedCategory, nil
 }

@@ -74,7 +74,7 @@ func LoadConfig() (*Config, error) {
 	viper.BindEnv("redis.port", "APP_REDIS_PORT")
 	viper.BindEnv("rabbitmq.host", "APP_RABBITMQ_HOST")
 	viper.BindEnv("rabbitmq.port", "APP_RABBITMQ_PORT")
-	
+
 	// Bind JWT config
 	viper.BindEnv("jwt.secret", "APP_JWT_SECRET")
 	viper.BindEnv("jwt.access_expiration_mins", "APP_JWT_ACCESS_EXPIRATION_MINS")

@@ -12,13 +12,13 @@ import (
 
 // ProductService handles business logic related to Product
 type ProductService struct {
-	repo        repository.ProductRepository
+	repo repository.ProductRepository
 }
 
 // NewProductService creates a new product service
 func NewProductService(repo repository.ProductRepository) *ProductService {
 	return &ProductService{
-		repo:        repo,
+		repo: repo,
 	}
 }
 

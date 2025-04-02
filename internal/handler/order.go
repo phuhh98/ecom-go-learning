@@ -69,7 +69,8 @@ func (h *OrderHandler) CreateOrder(c *gin.Context) {
 		return
 	}
 
-	order, err := h.orderService.Create(c.Request.Context(), createOrderDTO); if err != nil {
+	order, err := h.orderService.Create(c.Request.Context(), createOrderDTO)
+	if err != nil {
 		c.Error(err)
 		return
 	}

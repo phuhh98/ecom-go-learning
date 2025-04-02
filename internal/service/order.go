@@ -9,13 +9,13 @@ import (
 )
 
 type OrderService struct {
-	orderRepo repository.OrderRepository
+	orderRepo      repository.OrderRepository
 	productService *ProductService
 }
 
-func NewOrderService(orderRepo repository.OrderRepository, productService *ProductService ) *OrderService {
+func NewOrderService(orderRepo repository.OrderRepository, productService *ProductService) *OrderService {
 	return &OrderService{
-		orderRepo: orderRepo,
+		orderRepo:      orderRepo,
 		productService: productService,
 	}
 }
@@ -28,7 +28,7 @@ func (s *OrderService) Create(ctx context.Context, createOrderDTO dtos.CreateOrd
 	order := &models.Order{
 		UserID: createOrderDTO.UserID,
 		Status: "created",
-		Items: []*models.OrderItem{},
+		Items:  []*models.OrderItem{},
 	}
 	// Check list of product whether products exist
 	for _, item := range createOrderDTO.Items {
@@ -38,11 +38,10 @@ func (s *OrderService) Create(ctx context.Context, createOrderDTO dtos.CreateOrd
 		}
 
 		order.Items = append(order.Items, &models.OrderItem{
-			Product: *product,
-			Quantity:  item.Quantity,
+			Product:  *product,
+			Quantity: item.Quantity,
 		})
 	}
-
 
 	if err := s.orderRepo.Create(ctx, order); err != nil {
 		return nil, appError.NewServerError("error creating order", err)

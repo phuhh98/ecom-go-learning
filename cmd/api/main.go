@@ -46,17 +46,19 @@ func main() {
 	categoryService := service.NewCategoryService(repoFactory.Category, productService)
 	orderService := service.NewOrderService(repoFactory.Order, productService)
 
+	// Set up HTTP server with Gin
+	router := setupRouter()
 
-		// Set up HTTP server with Gin
-		router := setupRouter()
-
-		// Register handlers
-		api := router.Group("/api/v1")
+	// Register handlers
+	api := router.Group("/api/v1")
 
 	// Create auth middleware
 	authMiddleware := middleware.NewAuthMiddleware(cfg)
 
 	// Initialize handlers
+	authHandler := handler.NewAuthHandler(userService, tokenService)
+	authHandler.Register(api)
+
 	userHandler := handler.NewUserHandler(userService, tokenService)
 	userHandler.Register(api, authMiddleware.Authenticate())
 
@@ -71,7 +73,6 @@ func main() {
 
 	categoryHandler := handler.NewCategoryHandler(categoryService)
 	categoryHandler.Register(api, authMiddleware.Authenticate(), authMiddleware.RequireRole("admin"))
-
 
 	// // Admin-only routes
 	// admin := api.Group("/admin")

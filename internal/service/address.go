@@ -53,7 +53,7 @@ func (s *AddressService) GetByID(ctx context.Context, id uint) (*models.Address,
 }
 
 // Update updates an existing address
-func (s *AddressService) Update(ctx context.Context, id uint, updateAddressDTO dtos.UpdateAddressDTO) (*models.Address, error) {
+func (s *AddressService) Update(ctx context.Context, id uint, updateAddressDTO dtos.UpdateAddressDTO, userId uint) (*models.Address, error) {
 	// Get existing address
 	address, err := s.repo.GetByID(ctx, id)
 	if err != nil {
@@ -61,6 +61,11 @@ func (s *AddressService) Update(ctx context.Context, id uint, updateAddressDTO d
 			return nil, appError.NewNotFoundError("address not found")
 		}
 		return nil, appError.NewServerError("error retrieving address", err)
+	}
+
+	// Verify if the address belongs to the user
+	if address.UserID != userId {
+		return nil, appError.NewUnauthorizedError("you are not authorized to update this address")
 	}
 
 	// Update fields
@@ -83,7 +88,20 @@ func (s *AddressService) Update(ctx context.Context, id uint, updateAddressDTO d
 }
 
 // Delete removes a address
-func (s *AddressService) Delete(ctx context.Context, id uint) error {
+func (s *AddressService) Delete(ctx context.Context, id uint, userId uint) error {
+	// Verify if the address belongs to the user
+	address, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		if errors.Is(err, repository.ErrNotFound) {
+			return appError.NewNotFoundError("address not found")
+		}
+		return appError.NewServerError("error retrieving address", err)
+	}
+
+	if address.UserID != userId {
+		return appError.NewUnauthorizedError("you are not authorized to delete this address")
+	}
+
 	if err := s.repo.Delete(ctx, id); err != nil {
 		if errors.Is(err, repository.ErrNotFound) {
 			return appError.NewNotFoundError("address not found")

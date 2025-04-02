@@ -23,17 +23,17 @@ func NewRedisClient(cfg *config.RedisConfig) (*RedisClient, error) {
 		Password: "", // If Redis requires authentication
 		DB:       0,  // Default DB
 	})
-	
+
 	// Test connection
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	
+
 	if err := client.Ping(ctx).Err(); err != nil {
 		return nil, fmt.Errorf("failed to connect to Redis: %w", err)
 	}
-	
+
 	logger.Info("Connected to Redis", "addr", fmt.Sprintf("%s:%d", cfg.Host, cfg.Port))
-	
+
 	return &RedisClient{client: client}, nil
 }
 

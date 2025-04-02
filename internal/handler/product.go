@@ -25,7 +25,7 @@ func NewProductHandler(productService *service.ProductService) *ProductHandler {
 }
 
 // Register sets up routes for the product handler
-func (h *ProductHandler) Register(router *gin.RouterGroup,  authMiddleware gin.HandlerFunc, adminValidation gin.HandlerFunc ) {
+func (h *ProductHandler) Register(router *gin.RouterGroup, authMiddleware gin.HandlerFunc, adminValidation gin.HandlerFunc) {
 	products := router.Group("/products")
 	{
 		products.GET("", h.List)

@@ -31,16 +31,24 @@ func (h *AddressHandler) Register(router *gin.RouterGroup, authMiddleware gin.Ha
 	addresses.Use(authMiddleware)
 	{
 		addresses.POST("", h.Create)
+		addresses.GET("", h.List)
 		addresses.GET("/:id", h.GetByID)
 		addresses.PUT("/:id", h.Update)
 		addresses.DELETE("/:id", h.Delete)
-
 		addresses.GET("/user/:userId", h.ListByUserID)
 	}
 }
 
 // Create handles address creation
 func (h *AddressHandler) Create(c *gin.Context) {
+	// Extract user ID from the context (assuming it's set by the auth middleware)
+	userID, ok := c.Get("user_id")
+
+	if !ok {
+		c.Error(errors.NewUnauthorizedError("user ID not found in context"))
+		return
+	}
+
 	var createAddressDTO dtos.CreateAddressDTO
 	if err := c.ShouldBindJSON(&createAddressDTO); err != nil {
 		if ve, ok := err.(validator.ValidationErrors); ok {
@@ -51,6 +59,8 @@ func (h *AddressHandler) Create(c *gin.Context) {
 		c.Error(errors.NewBadRequestError("invalid input", err))
 		return
 	}
+
+	createAddressDTO.UserID = userID.(uint)
 
 	address, err := h.addressService.Create(c.Request.Context(), createAddressDTO)
 	if err != nil {
@@ -97,7 +107,14 @@ func (h *AddressHandler) Update(c *gin.Context) {
 		return
 	}
 
-	address, err := h.addressService.Update(c.Request.Context(), uint(id), updateAddressDTO)
+	// user id from context
+	userID, ok := c.Get("user_id")
+	if !ok {
+		c.Error(errors.NewUnauthorizedError("user ID not found in context"))
+		return
+	}
+
+	address, err := h.addressService.Update(c.Request.Context(), uint(id), updateAddressDTO, userID.(uint))
 	if err != nil {
 		c.Error(err)
 		return
@@ -114,7 +131,13 @@ func (h *AddressHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	if err := h.addressService.Delete(c.Request.Context(), uint(id)); err != nil {
+	// user id from context
+	userID, ok := c.Get("user_id")
+	if !ok {
+		c.Error(errors.NewUnauthorizedError("user ID not found in context"))
+	}
+
+	if err := h.addressService.Delete(c.Request.Context(), uint(id), userID.(uint)); err != nil {
 		c.Error(err)
 		return
 	}
@@ -141,6 +164,32 @@ func (h *AddressHandler) ListByUserID(c *gin.Context) {
 	}
 
 	addresses, total, err := h.addressService.ListByUserID(c.Request.Context(), page, pageSize, uint(userID))
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	response.SuccessWithPagination(c, http.StatusOK, addresses, page, pageSize, total)
+}
+
+func (h *AddressHandler) List(c *gin.Context) {
+	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	if err != nil || page <= 0 {
+		c.Error(errors.NewBadRequestError("invalid page parameter"))
+		return
+	}
+	pageSize, err := strconv.Atoi(c.DefaultQuery("per_page", "10"))
+	if err != nil || pageSize <= 0 {
+		c.Error(errors.NewBadRequestError("invalid per_page parameter"))
+		return
+	}
+
+	userID, ok := c.Get("user_id")
+	if !ok {
+		c.Error(errors.NewBadRequestError("invalid user ID in context"))
+		return
+	}
+
+	addresses, total, err := h.addressService.ListByUserID(c.Request.Context(), page, pageSize, userID.(uint))
 	if err != nil {
 		c.Error(err)
 		return
