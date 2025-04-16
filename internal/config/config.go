@@ -14,6 +14,12 @@ type Config struct {
 	Redis    RedisConfig    `mapstructure:"redis"`
 	RabbitMQ RabbitMQConfig `mapstructure:"rabbitmq"`
 	JWT      JWTConfig      `mapstructure:"jwt"`
+	Cors     CorsConfig     `mapstructure:"cors"`
+}
+
+// Cors config
+type CorsConfig struct {
+	AllowOrigins []string `mapstructure:"allow_origins"`
 }
 
 // ServerConfig holds all the server-related configuration

@@ -17,6 +17,7 @@ import (
 	"ecom-go/pkg/logger"
 	"ecom-go/pkg/validators"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
@@ -50,7 +51,7 @@ func main() {
 	orderService := service.NewOrderService(repoFactory.Order, productService, userService)
 
 	// Set up HTTP server with Gin
-	router := setupRouter()
+	router := setupRouter(cfg)
 
 	// Register handlers
 	api := router.Group("/api/v1")
@@ -119,7 +120,7 @@ func main() {
 	logger.Info("Server exited properly")
 }
 
-func setupRouter() *gin.Engine {
+func setupRouter(appConfig *config.Config) *gin.Engine {
 	// Set Gin mode
 	if os.Getenv("APP_ENV") == "production" {
 		gin.SetMode(gin.ReleaseMode)
@@ -135,6 +136,13 @@ func setupRouter() *gin.Engine {
 	router.Use(middleware.Logger())
 	router.Use(gin.Recovery())
 	router.Use(middleware.Error())
+
+	config := cors.DefaultConfig()
+
+	// Get Cors allow origins from environment variable
+	config.AllowOrigins = appConfig.Cors.AllowOrigins
+
+	router.Use(cors.New(config))
 
 	// Health check route
 	router.GET("/health", func(c *gin.Context) {
