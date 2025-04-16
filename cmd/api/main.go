@@ -141,6 +141,7 @@ func setupRouter(appConfig *config.Config) *gin.Engine {
 
 	// Get Cors allow origins from environment variable
 	config.AllowOrigins = appConfig.Cors.AllowOrigins
+	config.AllowCredentials = true
 
 	router.Use(cors.New(config))
 
