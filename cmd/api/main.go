@@ -146,5 +146,3 @@ func setupRouter() *gin.Engine {
 
 	return router
 }
-
-

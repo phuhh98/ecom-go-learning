@@ -33,6 +33,7 @@ func (h *AuthHandler) Register(router *gin.RouterGroup) {
 		auth.POST("/login", h.Login)
 		auth.POST("/refresh", h.RefreshToken)
 		auth.POST("/logout", h.Logout)
+		auth.POST("/verify", h.VerifyToken) // Register the new endpoint
 	}
 }
 
@@ -232,4 +233,43 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 	}
 
 	response.Success(c, http.StatusOK, gin.H{"message": "Successfully logged out"})
+}
+
+// VerifyToken verifies the validity of an access token
+// @Summary Verify token
+// @Description Verifies the validity of an access token
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param   access_token body string true "Access token"
+// @Success 200 {object} map[string]string "Success message"
+// @Failure 400 {object} errors.Error "Invalid input"
+// @Failure 401 {object} errors.Error "Invalid or expired token"
+// @Failure 500 {object} errors.Error "Server error"
+// @Router /auth/verify [post]
+func (h *AuthHandler) VerifyToken(c *gin.Context) {
+	var req struct {
+		AccessToken string `json:"access_token" binding:"required"`
+	}
+
+	// Try to get refresh token from cookie first
+	accessToken, err := c.Cookie("access_token")
+	if err == nil && accessToken != "" {
+		req.AccessToken = accessToken
+	} else {
+		// If not in cookie, get from request body
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.Error(errors.NewBadRequestError("invalid input", err))
+			return
+		}
+	}
+
+	// Verify the access token
+	err = h.tokenService.VerifyAccessToken(c.Request.Context(), req.AccessToken)
+	if err != nil {
+		c.Error(errors.NewUnauthorizedError("invalid or expired token"))
+		return
+	}
+
+	response.Success(c, http.StatusOK, gin.H{"message": "Token is valid"})
 }

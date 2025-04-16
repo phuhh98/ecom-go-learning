@@ -11,14 +11,14 @@ import (
 type OrderService struct {
 	orderRepo      repository.OrderRepository
 	productService *ProductService
-	userService  *UserService
+	userService    *UserService
 }
 
 func NewOrderService(orderRepo repository.OrderRepository, productService *ProductService, userService *UserService) *OrderService {
 	return &OrderService{
 		orderRepo:      orderRepo,
 		productService: productService,
-		userService: userService,
+		userService:    userService,
 	}
 }
 
@@ -32,7 +32,7 @@ func (s *OrderService) Create(ctx context.Context, createOrderDTO dtos.CreateOrd
 	if err != nil {
 		return nil, appError.NewNotFoundError("user not found", err)
 	}
-	
+
 	order := &models.Order{
 		UserID: createOrderDTO.UserID,
 		Status: "created",

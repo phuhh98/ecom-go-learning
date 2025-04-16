@@ -228,3 +228,32 @@ func (s *TokenService) RefreshTokens(ctx context.Context, refreshToken string) (
 
 	return tokenPair, nil
 }
+
+// VerifyAccessToken validates the provided access token
+func (s *TokenService) VerifyAccessToken(ctx context.Context, tokenString string) error {
+	// Parse the token
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, appError.NewUnauthorizedError("invalid token signing method")
+		}
+		return []byte(s.config.GetJWTSecret()), nil
+	})
+
+	if err != nil || !token.Valid {
+		return appError.NewUnauthorizedError("invalid or expired access token")
+	}
+
+	// Extract claims
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return appError.NewUnauthorizedError("invalid token claims")
+	}
+
+	// Verify token type
+	tokenType, ok := claims["type"].(string)
+	if !ok || tokenType != "access" {
+		return appError.NewUnauthorizedError("invalid token type")
+	}
+
+	return nil
+}
