@@ -13,6 +13,11 @@ redis:
   host: localhost
   port: 6379
 
+jwt:
+  secret: mysecretkey
+  access_expiration_mins: 30
+  refresh_expiration_days: 7
+
 rabbitmq:
   host: localhost
   port: 5672

@@ -1,9 +1,9 @@
 package dtos
 
 type CreateOrderDTO struct {
-	UserID uint           `json:"user_id"`
-	Status string         `json:"status" binding:"default=created,oneof=created processed intransit complete cancelled"`
-	Items  []OrderItemDTO `json:"items" binding:"required"`
+	Status    string         `json:"status" binding:"default=created,oneof=created processed intransit complete cancelled"`
+	Items     []OrderItemDTO `json:"items" binding:"required"`
+	AddressID uint           `json:"address_id" binding:"required"`
 }
 
 type OrderItemDTO struct {
@@ -13,5 +13,4 @@ type OrderItemDTO struct {
 
 type UpdateOrderDTO struct {
 	Status string `json:"status" binding:"required,oneof=created processed intransit complete cancelled"`
-	Items  []uint `json:"items" binding:"required"`
 }

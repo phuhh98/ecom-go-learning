@@ -42,6 +42,19 @@ func (h *ProductHandler) Register(router *gin.RouterGroup, authMiddleware gin.Ha
 }
 
 // Create handles product creation
+// @Summary Create product
+// @Description Create a new product (admin only)
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param product body dtos.CreateProductDTO true "Product information"
+// @Success 201 {object} dtos.DOCResponseWrapper{data=dtos.DOCProductResponse}
+// @Failure 400 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 401 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 403 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 500 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Router /products [post]
+// @Security BearerAuth
 func (h *ProductHandler) Create(c *gin.Context) {
 	var createProductDTO dtos.CreateProductDTO
 	if err := c.ShouldBindJSON(&createProductDTO); err != nil {
@@ -64,6 +77,17 @@ func (h *ProductHandler) Create(c *gin.Context) {
 }
 
 // GetByID handles retrieving a product by ID
+// @Summary Get product by ID
+// @Description Retrieve a product by its ID
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param id path int true "Product ID"
+// @Success 200 {object} dtos.DOCResponseWrapper{data=dtos.DOCProductResponse}
+// @Failure 400 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 404 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 500 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Router /products/{id} [get]
 func (h *ProductHandler) GetByID(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
@@ -81,6 +105,21 @@ func (h *ProductHandler) GetByID(c *gin.Context) {
 }
 
 // Update handles updating a product
+// @Summary Update product
+// @Description Update an existing product (admin only)
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param id path int true "Product ID"
+// @Param product body dtos.UpdateProductDTO true "Updated product information"
+// @Success 200 {object} dtos.DOCResponseWrapper{data=dtos.DOCProductResponse}
+// @Failure 400 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 401 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 403 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 404 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 500 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Router /products/{id} [put]
+// @Security BearerAuth
 func (h *ProductHandler) Update(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
@@ -109,6 +148,20 @@ func (h *ProductHandler) Update(c *gin.Context) {
 }
 
 // Delete handles deleting a product
+// @Summary Delete product
+// @Description Delete a product by ID (admin only)
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param id path int true "Product ID"
+// @Success 200 {object} dtos.DOCSuccessMessageResponse
+// @Failure 400 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 401 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 403 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 404 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 500 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Router /products/{id} [delete]
+// @Security BearerAuth
 func (h *ProductHandler) Delete(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
@@ -125,6 +178,17 @@ func (h *ProductHandler) Delete(c *gin.Context) {
 }
 
 // List handles retrieving products with pagination
+// @Summary List products
+// @Description Get a paginated list of products
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param page query int false "Page number (default: 1)"
+// @Param per_page query int false "Items per page (default: 10)"
+// @Success 200 {object} dtos.DOCPaginatedResponse{data=[]dtos.DOCProductSummary}
+// @Failure 400 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 500 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Router /products [get]
 func (h *ProductHandler) List(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("per_page", "10"))

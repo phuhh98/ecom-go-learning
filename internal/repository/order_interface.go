@@ -6,10 +6,10 @@ import (
 )
 
 type OrderRepository interface {
-	// List(ctx context.Context, page int, perPage int) ([]models.Order, error)
+	List(ctx context.Context, page int, perPage int) ([]models.Order, error)
+	ListByUser(ctx context.Context, userID uint, page int, perPage int) ([]models.Order, error)
 	Create(ctx context.Context, order *models.Order) error
-	// GetById(ctx context.Context, id uint) (*models.Order, error)
-	// Update( ctx context.Context, order *models.Order) error
-	// Delete(ctx context.Context, id uint) error
-	// GetItems(ctx context.Context, orderID uint) ([]*models.Item, error)
+	GetByID(ctx context.Context, id uint) (*models.Order, error)
+	Update(ctx context.Context, order *models.Order) error
+	Delete(ctx context.Context, id uint) error
 }

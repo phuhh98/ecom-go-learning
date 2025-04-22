@@ -46,6 +46,17 @@ func (h *UserHandler) Register(router *gin.RouterGroup, authMiddleware gin.Handl
 }
 
 // Create handles user creation
+// @Summary Create user
+// @Description Register a new user account
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param user body dtos.CreateUserDTO true "User registration information"
+// @Success 201 {object} dtos.DOCResponseWrapper{data=dtos.DOCUserDetailResponse}
+// @Failure 400 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 409 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError} "Email already exists"
+// @Failure 500 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Router /users [post]
 func (h *UserHandler) Create(c *gin.Context) {
 	var createUserDTO dtos.CreateUserDTO
 	if err := c.ShouldBindJSON(&createUserDTO); err != nil {
@@ -67,6 +78,20 @@ func (h *UserHandler) Create(c *gin.Context) {
 }
 
 // GetByID handles retrieving a user by ID
+// @Summary Get user by ID
+// @Description Retrieve a user's information by their ID
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param id path int true "User ID"
+// @Success 200 {object} dtos.DOCResponseWrapper{data=dtos.DOCUserDetailResponse}
+// @Failure 400 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 401 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 403 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 404 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 500 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Router /users/{id} [get]
+// @Security BearerAuth
 func (h *UserHandler) GetByID(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
@@ -84,6 +109,21 @@ func (h *UserHandler) GetByID(c *gin.Context) {
 }
 
 // Update handles updating a user
+// @Summary Update user
+// @Description Update a user's information
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param id path int true "User ID"
+// @Param user body dtos.UpdateUserDTO true "Updated user information"
+// @Success 200 {object} dtos.DOCResponseWrapper{data=dtos.DOCUserDetailResponse}
+// @Failure 400 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 401 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 403 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 404 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 500 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Router /users/{id} [put]
+// @Security BearerAuth
 func (h *UserHandler) Update(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
@@ -112,6 +152,20 @@ func (h *UserHandler) Update(c *gin.Context) {
 }
 
 // Delete handles deleting a user
+// @Summary Delete user
+// @Description Delete a user by ID
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param id path int true "User ID"
+// @Success 200 {object} dtos.DOCSuccessMessageResponse
+// @Failure 400 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 401 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 403 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 404 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 500 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Router /users/{id} [delete]
+// @Security BearerAuth
 func (h *UserHandler) Delete(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
@@ -128,6 +182,19 @@ func (h *UserHandler) Delete(c *gin.Context) {
 }
 
 // List handles retrieving users with pagination
+// @Summary List users
+// @Description Get a paginated list of users
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param page query int false "Page number (default: 1)"
+// @Param per_page query int false "Items per page (default: 10)"
+// @Success 200 {object} dtos.DOCPaginatedResponse{data=[]dtos.DOCUserListItem}
+// @Failure 400 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 401 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 500 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Router /users [get]
+// @Security BearerAuth
 func (h *UserHandler) List(c *gin.Context) {
 	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
 	if err != nil || page <= 0 {

@@ -1,3 +1,10 @@
+// @title E-Commerce API
+// @description API for the E-Commerce application
+// @version 1.0
+// @BasePath /api/v1
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 package main
 
 import (
@@ -21,6 +28,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	// Auto-generated docs
+	_ "ecom-go/docs"
 )
 
 func main() {
@@ -48,7 +61,7 @@ func main() {
 	productService := service.NewProductService(repoFactory.Product)
 	addressService := service.NewAddressService(repoFactory.Address)
 	categoryService := service.NewCategoryService(repoFactory.Category, productService)
-	orderService := service.NewOrderService(repoFactory.Order, productService, userService)
+	orderService := service.NewOrderService(repoFactory.Order, productService, userService, addressService)
 
 	// Set up HTTP server with Gin
 	router := setupRouter(cfg)
@@ -78,12 +91,8 @@ func main() {
 	categoryHandler := handler.NewCategoryHandler(categoryService)
 	categoryHandler.Register(api, authMiddleware.Authenticate(), authMiddleware.RequireRole("admin"))
 
-	// // Admin-only routes
-	// admin := api.Group("/admin")
-	// admin.Use(authMiddleware.Authenticate(), authMiddleware.RequireRole("admin"))
-	// {
-	// 	// Admin-only endpoints can go here
-	// }
+	// Swagger documentation endpoint
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Create HTTP server
 	server := &http.Server{

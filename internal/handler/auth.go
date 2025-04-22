@@ -33,24 +33,23 @@ func (h *AuthHandler) Register(router *gin.RouterGroup) {
 		auth.POST("/login", h.Login)
 		auth.POST("/refresh", h.RefreshToken)
 		auth.POST("/logout", h.Logout)
-		auth.POST("/verify", h.VerifyToken) // Register the new endpoint
+		auth.POST("/verify", h.VerifyToken)
 	}
 }
 
-// Login handles user login
-// @Summary Login a user
-// @Description Authenticates a user and returns access and refresh tokens
-// @Tags User
+// Login handles user authentication
+// @Summary Login user
+// @Description Authenticate user with email and password
+// @Tags auth
 // @Accept json
 // @Produce json
-// @Param   email     body    string     true  "Email"    binding:"required,email"
-// @Param   password  body    string     true  "Password" binding:"required"
-// @Param   use_cookies query  boolean    false "Set tokens as cookies"
-// @Success 200 {object} service.TokenResponse "Token pair"
-// @Failure 400 {object} errors.Error "Invalid input"
-// @Failure 401 {object} errors.Error "Invalid credentials"
-// @Failure 500 {object} errors.Error "Server error"
-// @Router /users/login [post]
+// @Param use_cookies query bool false "Set to 'true' to use cookie-based authentication"
+// @Param credentials body dtos.LoginDTO true "User credentials"
+// @Success 200 {object} dtos.DOCResponseWrapper{data=dtos.DOCTokenPair}
+// @Failure 400 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 401 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 500 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Router /auth/login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
 	var loginDTO dtos.LoginDTO
 	if err := c.ShouldBindJSON(&loginDTO); err != nil {
@@ -112,19 +111,19 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	response.Success(c, http.StatusOK, tokenPair)
 }
 
-// RefreshToken handles token refresh
-// @Summary Refresh tokens
-// @Description Exchanges a valid refresh token for a new token pair
-// @Tags User
+// RefreshToken handles refreshing authentication tokens
+// @Summary Refresh token
+// @Description Get a new access token using a refresh token
+// @Tags auth
 // @Accept json
 // @Produce json
-// @Param   refresh_token body string true "Refresh token"
-// @Param   use_cookies query boolean false "Set tokens as cookies"
-// @Success 200 {object} service.TokenResponse "New token pair"
-// @Failure 400 {object} errors.Error "Invalid input"
-// @Failure 401 {object} errors.Error "Invalid refresh token"
-// @Failure 500 {object} errors.Error "Server error"
-// @Router /users/refresh [post]
+// @Param use_cookies query bool false "Set to 'true' to use cookie-based authentication"
+// @Param refresh_request body dtos.DOCRefreshTokenRequest false "Refresh token (not required if using cookies)"
+// @Success 200 {object} dtos.DOCTokenPair
+// @Failure 400 {object} dtos.DOCErrorResponse
+// @Failure 401 {object} dtos.DOCErrorResponse
+// @Failure 500 {object} dtos.DOCErrorResponse
+// @Router /auth/refresh [post]
 func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	var req struct {
 		RefreshToken string `json:"refresh_token" binding:"required"`
@@ -158,9 +157,9 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 			tokenPair.AccessToken,
 			tokenPair.ExpiresIn,
 			"/",
-			"",
+			c.Request.Host,
 			c.Request.TLS != nil, // Secure (HTTPS only)
-			true,                 // HTTP only
+			false,                // HTTP only
 		)
 
 		// Set refresh token cookie with longer expiration
@@ -170,27 +169,27 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 			tokenPair.RefreshToken,
 			refreshExpiration,
 			"/",
-			"",
+			"localhost",
 			c.Request.TLS != nil, // Secure
-			true,                 // HTTP only
+			false,                // HTTP only
 		)
+
 	}
 
 	response.Success(c, http.StatusOK, tokenPair)
 }
 
-// Logout revokes the refresh token
-// @Summary Logout
-// @Description Invalidates the refresh token
-// @Tags User
+// Logout invalidates refresh tokens
+// @Summary Logout user
+// @Description Invalidate a refresh token to log out
+// @Tags auth
 // @Accept json
 // @Produce json
-// @Param   refresh_token body string false "Refresh token (not required when using cookies)"
-// @Success 200 {object} map[string]string "Success message"
-// @Failure 400 {object} errors.Error "Invalid input"
-// @Failure 401 {object} errors.Error "Invalid refresh token"
-// @Failure 500 {object} errors.Error "Server error"
-// @Router /users/logout [post]
+// @Param logout_request body dtos.DOCLogoutRequest false "Refresh token (not required if using cookies)"
+// @Success 200 {object} dtos.DOCSuccessMessageResponse
+// @Failure 400 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Failure 500 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
+// @Router /auth/logout [post]
 func (h *AuthHandler) Logout(c *gin.Context) {
 	var req struct {
 		RefreshToken string `json:"refresh_token"`
@@ -235,17 +234,17 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 	response.Success(c, http.StatusOK, gin.H{"message": "Successfully logged out"})
 }
 
-// VerifyToken verifies the validity of an access token
+// VerifyToken validates an access token
 // @Summary Verify token
-// @Description Verifies the validity of an access token
-// @Tags User
+// @Description Validate an access token
+// @Tags auth
 // @Accept json
 // @Produce json
-// @Param   access_token body string true "Access token"
-// @Success 200 {object} map[string]string "Success message"
-// @Failure 400 {object} errors.Error "Invalid input"
-// @Failure 401 {object} errors.Error "Invalid or expired token"
-// @Failure 500 {object} errors.Error "Server error"
+// @Param verify_request body dtos.DOCVerifyTokenRequest false "Access token (not required if using cookies)"
+// @Success 200 {object} dtos.DOCMessageResponse
+// @Failure 400 {object} dtos.DOCErrorResponse
+// @Failure 401 {object} dtos.DOCErrorResponse
+// @Failure 500 {object} dtos.DOCErrorResponse
 // @Router /auth/verify [post]
 func (h *AuthHandler) VerifyToken(c *gin.Context) {
 	var req struct {
