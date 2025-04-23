@@ -39,8 +39,8 @@ type DOCSuccessMessageResponse struct {
 // DOCPaginatedResponse represents a paginated response
 // @Description Paginated response format
 type DOCPaginatedResponse struct {
-	Success bool             `json:"success" example:"true"`
-	Data    interface{}      `json:"data"`
+	Success bool              `json:"success" example:"true"`
+	Data    interface{}       `json:"data"`
 	Meta    DOCPaginationMeta `json:"meta"`
 }
 

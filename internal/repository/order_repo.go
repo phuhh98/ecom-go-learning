@@ -18,25 +18,25 @@ func NewOrderRepo(db *gorm.DB) *OrderRepo {
 func (r *OrderRepo) List(ctx context.Context, page int, perPage int) ([]models.Order, error) {
 	var orders []models.Order
 	offset := (page - 1) * perPage
-	
+
 	result := r.db.WithContext(ctx).
 		Preload("Items.Product").
 		Preload("Address").
 		Offset(offset).
 		Limit(perPage).
 		Find(&orders)
-		
+
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	
+
 	return orders, nil
 }
 
 func (r *OrderRepo) ListByUser(ctx context.Context, userID uint, page int, perPage int) ([]models.Order, error) {
 	var orders []models.Order
 	offset := (page - 1) * perPage
-	
+
 	result := r.db.WithContext(ctx).
 		Preload("Items.Product").
 		Preload("Address").
@@ -44,11 +44,11 @@ func (r *OrderRepo) ListByUser(ctx context.Context, userID uint, page int, perPa
 		Offset(offset).
 		Limit(perPage).
 		Find(&orders)
-		
+
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	
+
 	return orders, nil
 }
 
@@ -63,7 +63,7 @@ func (r *OrderRepo) GetByID(ctx context.Context, id uint) (*models.Order, error)
 		Preload("Items.Product").
 		Preload("Address").
 		First(&order, id)
-		
+
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -82,7 +82,7 @@ func (r *OrderRepo) Delete(ctx context.Context, id uint) error {
 		if err := tx.Where("order_id = ?", id).Delete(&models.OrderItem{}).Error; err != nil {
 			return err
 		}
-		
+
 		// Then delete the order
 		return tx.Delete(&models.Order{}, id).Error
 	})

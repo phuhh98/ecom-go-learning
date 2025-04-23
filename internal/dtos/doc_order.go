@@ -3,23 +3,22 @@ package dtos
 // DOCAddressListResponse represents a paginated list of addresses for swagger
 // @Description Paginated list of orders
 type DOCOrderListResponse struct {
-	Data       []DOCOrderResponse `json:"data"`
-	Meta       DOCPaginationMeta `json:"meta"`
+	Data []DOCOrderResponse `json:"data"`
+	Meta DOCPaginationMeta  `json:"meta"`
 }
-
 
 // DOCOrderResponse represents an order response for swagger
 // @Description Order data response
 type DOCOrderResponse struct {
-	ID            uint              `json:"id" example:"1"`
-	UserID        uint              `json:"user_id" example:"1"`
-	Status        string            `json:"status" example:"pending"`
-	Total         float64           `json:"total" example:"99.99"`
-	Items         []DOCOrderItem    `json:"items"`
-	ShippingInfo  DOCOrderShipping  `json:"shipping_info"`
-	PaymentInfo   DOCOrderPayment   `json:"payment_info"`
-	CreatedAt     string            `json:"created_at" example:"2023-01-01T12:00:00Z"`
-	UpdatedAt     string            `json:"updated_at" example:"2023-01-01T12:30:00Z"`
+	ID           uint             `json:"id" example:"1"`
+	UserID       uint             `json:"user_id" example:"1"`
+	Status       string           `json:"status" example:"pending"`
+	Total        float64          `json:"total" example:"99.99"`
+	Items        []DOCOrderItem   `json:"items"`
+	ShippingInfo DOCOrderShipping `json:"shipping_info"`
+	PaymentInfo  DOCOrderPayment  `json:"payment_info"`
+	CreatedAt    string           `json:"created_at" example:"2023-01-01T12:00:00Z"`
+	UpdatedAt    string           `json:"updated_at" example:"2023-01-01T12:30:00Z"`
 }
 
 // DOCOrderItem represents an order item for swagger
@@ -58,9 +57,9 @@ type DOCOrderPayment struct {
 // DOCOrderSummary represents a simplified order for listings for swagger
 // @Description Summary of order information
 type DOCOrderSummary struct {
-	ID         uint    `json:"id" example:"1"`
-	Status     string  `json:"status" example:"pending"`
-	Total      float64 `json:"total" example:"99.99"`
-	ItemCount  int     `json:"item_count" example:"3"`
-	CreatedAt  string  `json:"created_at" example:"2023-01-01T12:00:00Z"`
+	ID        uint    `json:"id" example:"1"`
+	Status    string  `json:"status" example:"pending"`
+	Total     float64 `json:"total" example:"99.99"`
+	ItemCount int     `json:"item_count" example:"3"`
+	CreatedAt string  `json:"created_at" example:"2023-01-01T12:00:00Z"`
 }
