@@ -1,5 +1,13 @@
 package dtos
 
+// DOCAddressListResponse represents a paginated list of addresses for swagger
+// @Description Paginated list of orders
+type DOCOrderListResponse struct {
+	Data       []DOCOrderResponse `json:"data"`
+	Meta       DOCPaginationMeta `json:"meta"`
+}
+
+
 // DOCOrderResponse represents an order response for swagger
 // @Description Order data response
 type DOCOrderResponse struct {

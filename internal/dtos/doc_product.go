@@ -29,5 +29,4 @@ type DOCProductSummary struct {
 // @Description Paginated list of products
 type DOCProductListResponse struct {
 	Data       []DOCProductSummary `json:"data"`
-	Pagination DOCPaginationInfo   `json:"pagination"`
-}
+	Meta    DOCPaginationMeta `json:"meta"`}

@@ -27,17 +27,9 @@ type DOCAddressResponse struct {
 // @Description Paginated list of addresses
 type DOCAddressListResponse struct {
 	Data       []DOCAddressResponse `json:"data"`
-	Pagination DOCPaginationInfo    `json:"pagination"`
+	Meta       DOCPaginationMeta `json:"meta"`
 }
 
-// DOCPaginationInfo represents pagination information for domain-specific responses
-// @Description Pagination information for domain objects
-type DOCPaginationInfo struct {
-	CurrentPage int `json:"current_page" example:"1"`
-	PerPage     int `json:"per_page" example:"10"`
-	TotalItems  int `json:"total_items" example:"50"`
-	TotalPages  int `json:"total_pages" example:"5"`
-}
 
 // DOCMessageResponse represents a simple message response for swagger
 // @Description Simple message response

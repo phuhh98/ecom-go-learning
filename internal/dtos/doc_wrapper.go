@@ -5,8 +5,6 @@ package dtos
 type DOCResponseWrapper struct {
 	Success bool        `json:"success" example:"true"`
 	Data    interface{} `json:"data,omitempty"`
-	Error   interface{} `json:"error,omitempty"`
-	Meta    interface{} `json:"meta,omitempty"`
 }
 
 // DOCPaginationMeta contains pagination metadata

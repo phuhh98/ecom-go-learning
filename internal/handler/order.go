@@ -41,7 +41,7 @@ func (h *OrderHandler) Register(router *gin.RouterGroup, authMiddleware gin.Hand
 // @Produce json
 // @Param page query int false "Page number (default: 1)"
 // @Param per_page query int false "Items per page (default: 10)"
-// @Success 200 {object} dtos.DOCResponseWrapper{data=[]dtos.DOCOrderSummary}
+// @Success 200 {object} dtos.DOCOrderListResponse
 // @Failure 400 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
 // @Failure 401 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
 // @Failure 500 {object} dtos.DOCErrorWrapper{error=dtos.DOCStandardError}
