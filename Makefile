@@ -31,7 +31,7 @@ deps-up:
 	$(DOCKER) compose -f $(DOCKER_COMPOSE) up -d
 
 # 2. Run API service with OS detection
-run-api:
+run-api: swagger-gen
 ifeq ($(OS),Windows_NT)
 	air -c $(CMD_DIR)/api/.air.toml
 else
@@ -39,7 +39,7 @@ else
 endif
 
 # Run API in production mode
-run-api-prod: build
+run-api-prod: swagger-gen build
 	@echo "Starting API in production mode..."
 	ENV=production $(BIN_DIR)/api$(BINARY_EXT)
 
